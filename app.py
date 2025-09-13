@@ -26,6 +26,10 @@ def room4():
 def room6():
     return render_template('room6.html')
 
+@app.route('/room7')
+def room7():
+    return render_template('room7.html')
+
 # For local testing only:
 if __name__ == '__main__':
     app.run(debug=True)
