@@ -497,9 +497,9 @@
                         if (obj.isSpecial && gameState.suitFallen) {
                             // Draw fallen suit on the floor using ruined image
                             const aspect = ruinedSuitImage.naturalWidth / ruinedSuitImage.naturalHeight;
-                            const scaledWidth = aspect * 40;
+                            const scaledWidth = aspect * 100;
                             const drawX = obj.x + (60 - scaledWidth) / 2;
-                            ctx.drawImage(ruinedSuitImage, drawX, obj.y + 50, scaledWidth, 40);
+                            ctx.drawImage(ruinedSuitImage, drawX, obj.y + 50, scaledWidth, 100);
                         } else {
                             // Draw hanging suit
                             const aspect = suitImage.naturalWidth / suitImage.naturalHeight;
@@ -686,17 +686,17 @@ function interactWithObject(obj) {
             }
             break;
 
-                case 'door':
-                    if (obj.direction === 'left') {
-                        updateTerminal("> You go through the left door to room 7.");
-                        window.location.href = '/7';
-                    } else if (obj.direction === 'right') {
-                        updateTerminal("> You go through the right door to room 9.");
-                        window.location.href = '/9';
-                    }
-                    break;
+        case 'door':
+            if (obj.direction === 'left') {
+                updateTerminal("> You go through the left door to room 7.");
+                window.location.href = '/7';
+            } else if (obj.direction === 'right') {
+                updateTerminal("> You go through the right door to room 9.");
+                window.location.href = '/9';
             }
+            break;
         }
+    }
 
         // Update terminal text
         function updateTerminal(text) {
