@@ -195,7 +195,7 @@
         <canvas id="roomCanvas" width="800" height="600"></canvas>
 
         <div id="interactionHint" class="interaction-hint">
-            Search in pile of suits
+            Press SPACE to interact
         </div>
 
         <div id="puzzleModal" class="puzzle-modal">
@@ -314,11 +314,6 @@
             // Handle interaction
             if (e.key === ' ' && player.nearObject) {
                 interactWithObject(player.nearObject);
-            }
-
-            if (e.key === ' ') {
-                camera.shakeVelX = 0
-                camera.shakeVelY = 10
             }
         });
 
@@ -472,7 +467,7 @@
             camera.y = Math.min(Math.max(player.y - canvas.height / 2, cameraBounds.y0), cameraBounds.y1)
             
             // Update camera shake
-            camera.shakeVelX += -0.65 * camera.shakeX - 0.2 * camera.shakeVelX
+            camera.shakeVelX += -0.80 * camera.shakeX - 0.15 * camera.shakeVelX
             camera.shakeVelY += -0.65 * camera.shakeY - 0.2 * camera.shakeVelY
             camera.shakeX += camera.shakeVelX
             camera.shakeY += camera.shakeVelY
@@ -593,7 +588,7 @@
         }
 
         // Initialize game
-        // loadGameState();
+        loadGameState();
         updateInventory();
         startTimer();
         gameLoop();

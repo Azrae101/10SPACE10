@@ -195,13 +195,14 @@
         <canvas id="roomCanvas" width="800" height="600"></canvas>
 
         <div id="interactionHint" class="interaction-hint">
-            Search in pile of suits
+            Press SPACE to interact
         </div>
 
         <div id="puzzleModal" class="puzzle-modal">
             <button class="close-button" id="closePuzzle">✕</button>
             <h2 class="puzzle-title">SOMETHING IN THE PILE...</h2>
-            <p class="puzzle-content">You found a wrench in the pile of spacesuits!</p>
+            <p class="puzzle-content" id="puzzleContent">A pile of spacesuits lie on the floor. It reeks with parasites and a repellent odor.</p>
+            <button class="puzzle-button" id="searchPile">Search it</button>
             <button class="puzzle-button" id="pickupWrench">Pick it up</button>
         </div>
     </div>
@@ -240,7 +241,13 @@
             tileLifted: false,
             doorUnlocked: false,
             hasWrench: false,
+            engineFixed: false,
         };
+
+        // Local room state
+        let roomState = {
+            searchedPile: false,
+        }
 
         // Load game state from localStorage
         function loadGameState() {
@@ -269,6 +276,15 @@
                 height: 80,
                 interactive: true,
                 item: 'wrench'
+            },
+            {
+                type: 'fuel_tank',
+                x: 680,
+                y: 240,
+                width: 60,
+                height: 105,
+                interactive: true,
+                locked: true,
             }
         ];
 
@@ -281,6 +297,25 @@
             speed: 3,
             nearObject: null
         };
+
+        // Camera properties, for scrolling rooms and shake effects
+        const camera = {
+            x: 0,
+            y: 0,
+            shakeX: 0,
+            shakeY: 0,
+            shakeVelX: 0,
+            shakeVelY: 0,
+        }
+
+        const cameraBounds = {
+            x0: 0,
+            x1: 0,
+            y0: 0,
+            y1: 0,
+        }
+
+        let gameTime = 0
 
         // Load player image
         const playerImage = new Image();
@@ -307,7 +342,9 @@
 
         // Puzzle modal elements
         const puzzleModal = document.getElementById('puzzleModal');
+        const puzzleContent = document.getElementById('puzzleContent')
         const closePuzzleBtn = document.getElementById('closePuzzle');
+        const searchPileBtn = document.getElementById('searchPile')
         const pickupWrenchBtn = document.getElementById('pickupWrench');
 
         // Close puzzle modal
@@ -315,7 +352,17 @@
             puzzleModal.style.display = 'none';
         });
 
-        // Lift tile button
+        // Search pile button
+        searchPileBtn.addEventListener('click', () => {
+            if (!gameState.hasWrench && !roomState.searchedPile) {
+                roomState.searchedPile = true;
+                puzzleContent.innerHTML = "Your hand sinks into the pile. Parasites rapidly start crawling up your arm. You use your other hand to brush them off.<br/><br/>You find a wrench underneath the pile of suits!"
+                searchPileBtn.style.display = 'none'
+                pickupWrenchBtn.style.display = 'block'
+            }
+        });
+
+        // Pickup wrench button
         pickupWrenchBtn.addEventListener('click', () => {
             if (!gameState.hasWrench) {
                 gameState.hasWrench = true;
@@ -329,6 +376,14 @@
 
         // Draw the room
         function drawRoom() {
+            ctx.resetTransform()
+            let camX = camera.x + camera.shakeX
+            let camY = camera.y + camera.shakeY
+            ctx.translate(-camX, -camY)
+
+            // Light ambient camera shake
+            ctx.translate(4 * Math.cos(1.6343 * gameTime), 4 * Math.sin(2.6234 * gameTime))
+
             // Draw background (space station floor)
             ctx.fillStyle = '#222244';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -363,49 +418,9 @@
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
                         break;
 
-                    case 'door':
-                        ctx.fillStyle = gameState.doorUnlocked ? '#7cb342' : '#5d4037';
+                    case 'fuel_tank':
+                        ctx.fillStyle = '#556666';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-
-                        // Draw door details
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(obj.x + 10, obj.y + 20, 5, 120); // Door frame
-                        ctx.fillRect(obj.x + obj.width - 15, obj.y + 20, 5, 120); // Door frame
-
-                        // Draw door handle
-                        ctx.fillStyle = '#fffc00';
-                        ctx.beginPath();
-                        ctx.arc(obj.x + 60, obj.y + obj.height/2, 8, 0, Math.PI * 2);
-                        ctx.fill();
-                        break;
-
-                    case 'equipment':
-                        ctx.fillStyle = '#555577';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-
-                        // Add equipment details
-                        ctx.fillStyle = '#4afcff';
-                        ctx.fillRect(obj.x + 10, obj.y + 10, 10, 10);
-                        ctx.fillRect(obj.x + obj.width - 20, obj.y + 10, 10, 10);
-                        break;
-
-                    case 'console':
-                        ctx.fillStyle = '#333355';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-
-                        // Console screen
-                        ctx.fillStyle = '#4afcff';
-                        ctx.fillRect(obj.x + 10, obj.y + 10, obj.width - 20, 20);
-
-                        // Console buttons
-                        ctx.fillStyle = '#ff2c7d';
-                        ctx.beginPath();
-                        ctx.arc(obj.x + 30, obj.y + 40, 5, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.beginPath();
-                        ctx.arc(obj.x + 60, obj.y + 40, 5, 0, Math.PI * 2);
-                        ctx.fill();
-                        break;
                 }
             });
 
@@ -434,6 +449,19 @@
             // Constrain player to room
             player.x = Math.max(player.radius + 30, Math.min(canvas.width - player.radius - 30, player.x));
             player.y = Math.max(player.radius + 30, Math.min(canvas.height - player.radius - 30, player.y));
+
+            // Move the camera to follow player
+            camera.x = Math.min(Math.max(player.x - canvas.width / 2, cameraBounds.x0), cameraBounds.x1)
+            camera.y = Math.min(Math.max(player.y - canvas.height / 2, cameraBounds.y0), cameraBounds.y1)
+            
+            // Update camera shake
+            camera.shakeVelX += -0.80 * camera.shakeX - 0.15 * camera.shakeVelX
+            camera.shakeVelY += -0.65 * camera.shakeY - 0.2 * camera.shakeVelY
+            camera.shakeX += camera.shakeVelX
+            camera.shakeY += camera.shakeVelY
+
+            gameTime += 1/60 // assuming 60hz update rate
+
 
             // Check for nearby objects
             player.nearObject = null;
@@ -478,30 +506,32 @@
                 case 'pile_of_suits':
                     if (!gameState.hasWrench) {
                         puzzleModal.style.display = 'block';
+                        puzzleContent.innerHTML = "A pile of spacesuits lie on the floor. It reeks with parasites and a repellent odor."
+                        searchPileBtn.style.display = 'block'
+                        pickupWrenchBtn.style.display = 'none'
                     }
                     break;
 
-                case 'door':
+                case 'fuel_tank':
                     if (obj.locked) {
-                        if (gameState.hasKey) {
+                        if (gameState.hasWrench) {
                             obj.locked = false;
-                            gameState.doorUnlocked = true;
-                            updateTerminal("> You used the Access Key to unlock the door!");
-                            saveGameState();
+                            updateTerminal("> You used the Wrench to open the Fuel Tank!");
                         } else {
-                            updateTerminal("> The door is locked. You need an Access Key.");
+                            updateTerminal("> The Fuel Tank is shut. You need something to open it.");
                         }
                     } else {
-                        updateTerminal("> The door is unlocked. You can proceed to the next room.");
-                        // Transition to next room
-                        gameState.currentRoom = 'room2';
-                        saveGameState();
-                        window.location.href = '/room2';
+                        if (gameState.engineFixed) {
+                            updateTerminal("> The engine is operational.");
+                        } else {
+                            gameState.engineFixed = true
+                            updateTerminal("> You attached an Oxygen Tank to the Fuel Tank.");
+                            updateTerminal("> Engine status: OXYGEN REPLENISHED. ENGINE EFFICIENCY RESTORED.")
+                            saveGameState();
+                            camera.shakeVelY = 20;
+                            camera.shakeVelX = -30;
+                        }
                     }
-                    break;
-
-                case 'console':
-                    updateTerminal("> The console displays: 'SYSTEM OFFLINE - MAINTENANCE REQUIRED'");
                     break;
             }
         }
@@ -549,7 +579,7 @@
         }
 
         // Initialize game
-        // loadGameState();
+        loadGameState();
         updateInventory();
         startTimer();
         gameLoop();
