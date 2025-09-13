@@ -443,6 +443,10 @@
         const ruinedSuitImage = new Image();
         ruinedSuitImage.src = '/static/suit_ruined.png';
 
+        // Load parasite gif image
+        const parasiteImage = new Image();
+        parasiteImage.src = '/static/Parasite.gif';
+
         // Input handling
         const keys = {};
 
@@ -529,10 +533,15 @@
             // Draw parasites if released
             if (gameState.parasitesReleased) {
                 parasites.forEach(parasite => {
-                    ctx.fillStyle = '#7cb342';
-                    ctx.beginPath();
-                    ctx.arc(parasite.x, parasite.y, parasite.radius, 0, Math.PI * 2);
-                    ctx.fill();
+                    if (parasiteImage.complete) {
+                        const size = parasite.radius * 3; // scale size relative to radius
+                        ctx.drawImage(parasiteImage, parasite.x - size/2, parasite.y - size/2, size, size);
+                    } else {
+                        ctx.fillStyle = '#7cb342';
+                        ctx.beginPath();
+                        ctx.arc(parasite.x, parasite.y, parasite.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 });
             }
 

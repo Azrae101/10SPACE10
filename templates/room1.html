@@ -487,6 +487,10 @@
         const floorTileImage = new Image();
         floorTileImage.src = '/static/floor_tile.png';
 
+        // Load terminal image
+        const terminalImage = new Image();
+        terminalImage.src = '/static/terminal.png';
+
         // Input handling
         const keys = {};
 
@@ -658,24 +662,13 @@
                         break;
 
                     case 'console':
-                        ctx.fillStyle = '#111122';
-                        ctx.fillRect(obj.x + bgX, obj.y, obj.width, obj.height);
-
-                        // Console screen
-                        ctx.fillStyle = '#4afcff';
-                        ctx.fillRect(obj.x + bgX + 10, obj.y + 10, obj.width - 20, 20);
-
-                        // Console buttons
-                        ctx.shadowColor = '#ff2c7d';
-                        ctx.shadowBlur = 10;
-                        ctx.fillStyle = '#ff2c7d';
-                        ctx.beginPath();
-                        ctx.arc(obj.x + bgX + 30, obj.y + 40, 5, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.beginPath();
-                        ctx.arc(obj.x + bgX + 60, obj.y + 40, 5, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.shadowBlur = 0;
+                        if (terminalImage.complete) {
+                            ctx.drawImage(terminalImage, obj.x + bgX, obj.y, obj.width, obj.height);
+                        } else {
+                            terminalImage.onload = () => {
+                                ctx.drawImage(terminalImage, obj.x + bgX, obj.y, obj.width, obj.height);
+                            };
+                        }
                         break;
 
                     case 'flashlight':
