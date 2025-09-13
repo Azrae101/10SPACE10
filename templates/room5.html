@@ -12,7 +12,7 @@
         }
 
         body {
-            background-color: #0a0a2a;
+            background-color: #000011;
             color: #fff;
             font-family: 'Courier New', monospace;
             overflow: hidden;
@@ -26,8 +26,8 @@
 
         .game-container {
             position: relative;
-            width: 800px;
-            height: 500px;
+            width: 1200px;
+            height: 750px;
             margin-bottom: 20px;
             border: 4px solid #4afcff;
             border-radius: 10px;
@@ -36,14 +36,14 @@
         }
 
         #roomCanvas {
-            background-color: #111133;
+            background-color: #000011;
             width: 100%;
             height: 100%;
         }
 
         .ui-container {
             display: flex;
-            width: 800px;
+            width: 1200px;
             gap: 20px;
         }
 
@@ -171,14 +171,15 @@
 
         #inventory-items {
             margin-top: 10px;
-            min-height: 40px;
+            height: 40px;
             border: 1px solid #4afcff;
             border-radius: 5px;
             padding: 5px;
+            overflow-y: auto;
         }
 
         .inventory-item {
-            display: inline-block;
+            display: block;
             background-color: #4afcff;
             color: #0a0a2a;
             padding: 5px 10px;
@@ -186,13 +187,114 @@
             margin: 3px;
             font-weight: bold;
         }
+
+        .game-over-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #1a1a3a;
+            border: 3px solid #ff2c7d;
+            border-radius: 10px;
+            padding: 30px;
+            width: 500px;
+            z-index: 200;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            display: none;
+            text-align: center;
+        }
+
+        .game-over-title {
+            color: #ff2c7d;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .game-over-content {
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .game-over-button {
+            background-color: #ff2c7d;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 15px 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: background-color 0.3s;
+        }
+
+        .game-over-button:hover {
+            background-color: #cc1a5a;
+        }
+
+        .pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 150;
+            display: none;
+        }
+
+        .pause-title {
+            color: #4afcff;
+            font-size: 4rem;
+            text-shadow: 0 0 20px rgba(74, 252, 255, 0.5);
+            text-align: center;
+        }
+
+        .settings-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #4afcff;
+            color: #4afcff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 10;
+        }
+
+        .settings-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #4afcff;
+            display: none;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .settings-option {
+            background: none;
+            border: none;
+            color: #4afcff;
+            padding: 10px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .settings-option:hover {
+            background: rgba(74,252,255,0.2);
+        }
     </style>
 </head>
 <body>
     <h1>SPACE STATION ESCAPE - ROOM 5</h1>
 
     <div class="game-container">
-        <canvas id="roomCanvas" width="800" height="600"></canvas>
+        <canvas id="roomCanvas" width="1200" height="750"></canvas>
 
         <div id="interactionHint" class="interaction-hint">
             Press SPACE to interact
@@ -233,7 +335,7 @@
     <script>
         // Game state
         let gameState = {
-            currentRoom: 'room1',
+            currentRoom: 'room5',
             timer: 600, // 10 minutes in seconds
             inventory: [],
             hasKey: false,
@@ -278,7 +380,7 @@
             y: canvas.height / 2,
             radius: 15,
             color: '#4afcff',
-            speed: 3,
+            speed: 5,
             nearObject: null
         };
 
@@ -294,16 +396,16 @@
 
         const cameraBounds = {
             x0: 0,
-            x1: 3400,
+            x1: 4050,
             y0: 0,
             y1: 0,
         }
 
         const roomBounds = {
             x0: 0,
-            x1: 4200,
-            y0: 380,
-            y1: 560,
+            x1: 5250,
+            y0: 460,
+            y1: 620,
         }
 
         let gameTime = 0
@@ -315,8 +417,11 @@
         const bgImage = new Image(600, 4200);
         bgImage.src = '/static/bg_room_5.png'
 
-        const darkImage = new Image();
-        darkImage.src = '/static/dark.png';
+        // const darkImage = new Image();
+        // darkImage.src = '/static/dark.png';
+
+        const darkFlashlightImage = new Image();
+        darkFlashlightImage.src = '/static/dark_flashlight.png'
 
         // Input handling
         const keys = {};
@@ -376,19 +481,42 @@
 
             // Draw background
             if (bgImage.complete) {
-                ctx.drawImage(bgImage, 0, 0, 4200, 600);
+                ctx.drawImage(bgImage, 0, 0, 5250, 750);
             }
 
             // Draw objects
             roomObjects.forEach(obj => {
                 switch (obj.type) {
-                    case 'pile_of_suits':
-                        ctx.fillStyle = '#444466';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                    case 'floor_tile':
+                        if (obj.isLoose) {
+                            // Draw as normal tile
+                            const tileX = Math.floor(obj.x / 40) * 40;
+                            const tileY = Math.floor(obj.y / 40) * 40;
+                            const isAlt = ((tileX / 40) + (tileY / 40)) % 2 === 0;
+                            ctx.fillStyle = isAlt ? '#111122' : '#0a0a22';
+                            ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                            // Add pixel art details
+                            ctx.fillStyle = '#222233';
+                            ctx.fillRect(obj.x + 2, obj.y + 2, 36, 36);
+                            ctx.fillStyle = '#1a1a33';
+                            ctx.fillRect(obj.x + 5, obj.y + 5, 30, 30);
+
+                            if (!gameState.tileLifted) {
+                                // Make half black to indicate loose
+                                ctx.fillStyle = '#000000';
+                                ctx.fillRect(obj.x, obj.y, obj.width / 2, obj.height);
+                            } else if (obj.item && !gameState.hasKey) {
+                                // Draw key if not yet taken
+                                ctx.fillStyle = '#fffc00';
+                                ctx.beginPath();
+                                ctx.arc(obj.x + obj.width/2, obj.y + obj.height/2, 8, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        }
                         break;
 
                     case 'door':
-                        ctx.fillStyle = gameState.doorUnlocked ? '#7cb342' : '#5d4037';
+                        ctx.fillStyle = gameState.doorUnlocked ? '#4a5d2a' : '#2a201b';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
 
                         // Draw door details
@@ -404,7 +532,7 @@
                         break;
 
                     case 'equipment':
-                        ctx.fillStyle = '#555577';
+                        ctx.fillStyle = '#333344';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
 
                         // Add equipment details
@@ -414,7 +542,7 @@
                         break;
 
                     case 'console':
-                        ctx.fillStyle = '#333355';
+                        ctx.fillStyle = '#111122';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
 
                         // Console screen
@@ -422,6 +550,8 @@
                         ctx.fillRect(obj.x + 10, obj.y + 10, obj.width - 20, 20);
 
                         // Console buttons
+                        ctx.shadowColor = '#ff2c7d';
+                        ctx.shadowBlur = 10;
                         ctx.fillStyle = '#ff2c7d';
                         ctx.beginPath();
                         ctx.arc(obj.x + 30, obj.y + 40, 5, 0, Math.PI * 2);
@@ -429,13 +559,31 @@
                         ctx.beginPath();
                         ctx.arc(obj.x + 60, obj.y + 40, 5, 0, Math.PI * 2);
                         ctx.fill();
+                        ctx.shadowBlur = 0;
+                        break;
+
+                    case 'flashlight':
+                        // Only draw if not in inventory
+                        if (!gameState.inventory.includes('Flashlight')) {
+                            // Draw flashlight body (cylinder-like)
+                            ctx.fillStyle = '#333333';
+                            ctx.fillRect(obj.x + 2, obj.y, obj.width - 4, obj.height);
+                            // Draw lens
+                            ctx.fillStyle = '#ffff00';
+                            ctx.beginPath();
+                            ctx.arc(obj.x + obj.width / 2, obj.y + obj.height / 2, 8, 0, Math.PI * 2);
+                            ctx.fill();
+                            // Draw switch
+                            ctx.fillStyle = '#666666';
+                            ctx.fillRect(obj.x + obj.width - 5, obj.y + 5, 3, 10);
+                        }
                         break;
                 }
             });
 
             // Draw player
             if (playerImage.complete) {
-                ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
+                ctx.drawImage(playerImage, player.x - 80, player.y - 160, 160, 320);
             } else {
                 // Fallback to circle if image not loaded
                 ctx.fillStyle = player.color;
@@ -447,7 +595,8 @@
             }
 
             // Draw darkness
-            ctx.drawImage(darkImage, player.x - 1024, player.y - 768, 2048, 1536)
+            // ctx.drawImage(darkImage, player.x - 1536, player.y - 1152, 3072, 2304)
+            ctx.drawImage(darkFlashlightImage, player.x - 1536, player.y - 1152, 3072, 2304)
         }
 
         // Update game state
