@@ -384,6 +384,7 @@
         // Canvas setup
         const canvas = document.getElementById('roomCanvas');
         const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
 
         // Flashing lights
         let flashingLights = [];
