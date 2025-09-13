@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Station Escape - First Room</title>
+    <title>Space Station Escape - Room 2</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             background-color: #0a0a2a;
             color: #fff;
@@ -23,7 +23,7 @@
             height: 100vh;
             padding: 20px;
         }
-        
+
         .game-container {
             position: relative;
             width: 800px;
@@ -34,19 +34,19 @@
             overflow: hidden;
             box-shadow: 0 0 20px rgba(74, 252, 255, 0.3);
         }
-        
+
         #roomCanvas {
             background-color: #111133;
             width: 100%;
             height: 100%;
         }
-        
+
         .ui-container {
             display: flex;
             width: 800px;
             gap: 20px;
         }
-        
+
         .status-panel {
             background-color: rgba(0, 20, 40, 0.8);
             border: 2px solid #4afcff;
@@ -54,7 +54,7 @@
             padding: 15px;
             width: 200px;
         }
-        
+
         .terminal {
             background-color: rgba(0, 20, 40, 0.8);
             border: 2px solid #4afcff;
@@ -64,7 +64,7 @@
             height: 250px;
             overflow-y: auto;
         }
-        
+
         h1 {
             color: #4afcff;
             text-shadow: 0 0 10px rgba(74, 252, 255, 0.5);
@@ -72,27 +72,27 @@
             font-size: 2.5rem;
             text-align: center;
         }
-        
+
         .status-item {
             margin-bottom: 10px;
         }
-        
+
         .status-label {
             color: #ff2c7d;
             font-weight: bold;
             margin-right: 5px;
         }
-        
+
         #timer {
             font-size: 1.5rem;
             color: #4afcff;
         }
-        
+
         #terminal-content {
             color: #e0e0e0;
             line-height: 1.4;
         }
-        
+
         .interaction-hint {
             position: absolute;
             background-color: rgba(0, 0, 0, 0.7);
@@ -104,7 +104,7 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-        
+
         .puzzle-modal {
             position: absolute;
             top: 50%;
@@ -119,19 +119,19 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
             display: none;
         }
-        
+
         .puzzle-title {
             color: #4afcff;
             margin-bottom: 15px;
             text-align: center;
             font-size: 1.5rem;
         }
-        
+
         .puzzle-content {
             margin-bottom: 20px;
             line-height: 1.5;
         }
-        
+
         .puzzle-input {
             background-color: #0a0a2a;
             border: 2px solid #4afcff;
@@ -142,7 +142,7 @@
             margin-bottom: 15px;
             font-family: 'Courier New', monospace;
         }
-        
+
         .puzzle-button {
             background-color: #4afcff;
             color: #0a0a2a;
@@ -153,11 +153,11 @@
             font-weight: bold;
             transition: background-color 0.3s;
         }
-        
+
         .puzzle-button:hover {
             background-color: #3aa8d0;
         }
-        
+
         .close-button {
             position: absolute;
             top: 10px;
@@ -168,7 +168,7 @@
             font-size: 1.2rem;
             cursor: pointer;
         }
-        
+
         #inventory-items {
             margin-top: 10px;
             min-height: 40px;
@@ -176,7 +176,7 @@
             border-radius: 5px;
             padding: 5px;
         }
-        
+
         .inventory-item {
             display: inline-block;
             background-color: #4afcff;
@@ -189,23 +189,24 @@
     </style>
 </head>
 <body>
-    <h1>SPACE STATION ESCAPE - ROOM 1</h1>
-    
+    <h1>SPACE STATION ESCAPE - ROOM 2</h1>
+
     <div class="game-container">
         <canvas id="roomCanvas" width="800" height="600"></canvas>
-        
+
         <div id="interactionHint" class="interaction-hint">
             Press SPACE to interact
         </div>
-        
+
         <div id="puzzleModal" class="puzzle-modal">
             <button class="close-button" id="closePuzzle">✕</button>
-            <h2 class="puzzle-title">LOOSE FLOOR TILE</h2>
-            <p class="puzzle-content">You found a loose floor tile! It seems like something might be hidden underneath. Try to lift it.</p>
-            <button class="puzzle-button" id="liftTile">Lift Tile</button>
+            <h2 class="puzzle-title">SECURITY PANEL</h2>
+            <p class="puzzle-content">You found a security panel. It requires a code to unlock the exit. The code might be related to the station's ID.</p>
+            <input type="text" id="codeInput" class="puzzle-input" placeholder="Enter code">
+            <button class="puzzle-button" id="submitCode">Submit Code</button>
         </div>
     </div>
-    
+
     <div class="ui-container">
         <div class="status-panel">
             <div class="status-item">
@@ -214,19 +215,19 @@
             </div>
             <div class="status-item">
                 <span class="status-label">ROOM:</span>
-                <span id="room-name">Storage Bay</span>
+                <span id="room-name">Corridor</span>
             </div>
             <div class="status-item">
                 <span class="status-label">INVENTORY:</span>
                 <div id="inventory-items">Empty</div>
             </div>
         </div>
-        
+
         <div class="terminal">
             <div id="terminal-content">
-                > You are in the storage bay of Space Station Omega.<br>
-                > The room appears to be in disarray, with equipment scattered about.<br>
-                > One of the floor tiles seems loose. You should investigate.<br>
+                > You have entered the corridor leading to the escape pods.<br>
+                > The corridor is dimly lit, with emergency lights flickering.<br>
+                > There's a security panel blocking the exit. You need to find the code.<br>
                 > Use WASD to move around and SPACE to interact with objects.
             </div>
         </div>
@@ -234,66 +235,78 @@
 
     <script>
         // Game state
-        const gameState = {
-            currentRoom: 'storage_bay',
+        let gameState = {
+            currentRoom: 'room2',
             timer: 600, // 10 minutes in seconds
             inventory: [],
             hasKey: false,
             tileLifted: false,
-            doorUnlocked: false
+            doorUnlocked: false,
+            exitUnlocked: false
         };
+
+        // Load game state from localStorage
+        function loadGameState() {
+            const savedState = localStorage.getItem('spaceStationGameState');
+            if (savedState) {
+                gameState = JSON.parse(savedState);
+            }
+        }
+
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('spaceStationGameState', JSON.stringify(gameState));
+        }
 
         // Canvas setup
         const canvas = document.getElementById('roomCanvas');
         const ctx = canvas.getContext('2d');
-        
-        // Room layout and objects
+
+        // Room layout and objects (corridor style)
         const roomObjects = [
-            { 
-                type: 'floor_tile', 
-                x: 350, 
-                y: 250, 
-                width: 40, 
-                height: 40, 
-                interactive: true, 
-                isLoose: true,
-                item: 'key'
+            {
+                type: 'security_panel',
+                x: 700,
+                y: 200,
+                width: 60,
+                height: 100,
+                interactive: true,
+                locked: true
             },
-            { 
-                type: 'door', 
-                x: 700, 
-                y: 200, 
-                width: 80, 
-                height: 160, 
-                interactive: true, 
-                locked: true 
+            {
+                type: 'vent',
+                x: 300,
+                y: 100,
+                width: 80,
+                height: 40,
+                interactive: true
             },
-            { 
-                type: 'equipment', 
-                x: 200, 
-                y: 150, 
-                width: 60, 
-                height: 60, 
-                interactive: false 
+            {
+                type: 'emergency_light',
+                x: 100,
+                y: 50,
+                width: 40,
+                height: 40,
+                interactive: false
             },
-            { 
-                type: 'equipment', 
-                x: 500, 
-                y: 350, 
-                width: 80, 
-                height: 40, 
-                interactive: false 
+            {
+                type: 'emergency_light',
+                x: 600,
+                y: 50,
+                width: 40,
+                height: 40,
+                interactive: false
             },
-            { 
-                type: 'console', 
-                x: 100, 
-                y: 400, 
-                width: 120, 
-                height: 60, 
-                interactive: true 
+            {
+                type: 'door_back',
+                x: 20,
+                y: 200,
+                width: 80,
+                height: 160,
+                interactive: true
             }
         ];
-        
+
         // Player properties
         const player = {
             x: canvas.width / 2,
@@ -307,154 +320,127 @@
         // Load player image
         const playerImage = new Image();
         playerImage.src = '/static/chr.png';
-        
+
         // Input handling
         const keys = {};
-        
+
         window.addEventListener('keydown', (e) => {
             keys[e.key.toLowerCase()] = true;
-            
+
             // Handle interaction
             if (e.key === ' ' && player.nearObject) {
                 interactWithObject(player.nearObject);
             }
         });
-        
+
         window.addEventListener('keyup', (e) => {
             keys[e.key.toLowerCase()] = false;
         });
-        
+
         // Interaction hint element
         const interactionHint = document.getElementById('interactionHint');
-        
+
         // Puzzle modal elements
         const puzzleModal = document.getElementById('puzzleModal');
         const closePuzzleBtn = document.getElementById('closePuzzle');
-        const liftTileBtn = document.getElementById('liftTile');
-        
+        const submitCodeBtn = document.getElementById('submitCode');
+        const codeInput = document.getElementById('codeInput');
+
         // Close puzzle modal
         closePuzzleBtn.addEventListener('click', () => {
             puzzleModal.style.display = 'none';
         });
-        
-        // Lift tile button
-        liftTileBtn.addEventListener('click', () => {
-            if (!gameState.tileLifted) {
-                gameState.tileLifted = true;
-                gameState.hasKey = true;
-                gameState.inventory.push('Access Key');
-                updateInventory();
-                updateTerminal("> You lifted the loose tile and found an Access Key!");
+
+        // Submit code button
+        submitCodeBtn.addEventListener('click', () => {
+            const code = codeInput.value.trim();
+            if (code === 'OMEGA') {
+                gameState.exitUnlocked = true;
+                updateTerminal("> Access granted! The exit is now unlocked.");
                 puzzleModal.style.display = 'none';
+                saveGameState();
+            } else {
+                updateTerminal("> Incorrect code. Access denied.");
             }
+            codeInput.value = '';
         });
-        
+
         // Draw the room
         function drawRoom() {
-            // Draw background (space station floor)
-            ctx.fillStyle = '#222244';
+            // Draw background (corridor)
+            ctx.fillStyle = '#1a1a3a';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw floor tiles (pixel art)
-            for (let x = 0; x < canvas.width; x += 40) {
-                for (let y = 0; y < canvas.height; y += 40) {
-                    // Alternate tile colors for pattern
-                    const isAlt = ((x / 40) + (y / 40)) % 2 === 0;
-                    ctx.fillStyle = isAlt ? '#333355' : '#2a2a44';
-                    ctx.fillRect(x, y, 40, 40);
-                    // Add pixel art details
-                    ctx.fillStyle = '#444466';
-                    ctx.fillRect(x + 2, y + 2, 36, 36);
-                    ctx.fillStyle = '#3a3a55';
-                    ctx.fillRect(x + 5, y + 5, 30, 30);
-                }
-            }
+            // Draw floor (metallic)
+            ctx.fillStyle = '#333355';
+            ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
 
             // Draw walls
-            ctx.fillStyle = '#808080';
+            ctx.fillStyle = '#555577';
             ctx.fillRect(0, 0, canvas.width, 30);
             ctx.fillRect(0, 0, 30, canvas.height);
             ctx.fillRect(canvas.width - 30, 0, 30, canvas.height);
-            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
 
-                // Draw subtle "T" on the top wall
-                ctx.fillStyle = '#ccc'; // softer than pure white
-                // Vertical stem (thin, short)
-                ctx.fillRect(397, 5, 6, 12);
-                // Horizontal bar (slim)
-                ctx.fillRect(392, 5, 16, 4);
+            // Draw ceiling lights
+            for (let i = 0; i < canvas.width; i += 100) {
+                ctx.fillStyle = '#fffc00';
+                ctx.beginPath();
+                ctx.arc(i + 50, 50, 10, 0, Math.PI * 2);
+                ctx.fill();
+            }
 
-            
             // Draw objects
             roomObjects.forEach(obj => {
                 switch (obj.type) {
-                    case 'floor_tile':
-                        if (obj.isLoose) {
-                            // Draw loose tile differently
-                            ctx.fillStyle = gameState.tileLifted ? '#333355' : '#444466';
-                            ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                            
-                            if (!gameState.tileLifted) {
-                                // Draw slight elevation for loose tile
-                                ctx.strokeStyle = '#fffc00';
-                                ctx.lineWidth = 2;
-                                ctx.strokeRect(obj.x + 2, obj.y + 2, obj.width - 4, obj.height - 4);
-                            } else if (obj.item && !gameState.hasKey) {
-                                // Draw key if not yet taken
-                                ctx.fillStyle = '#fffc00';
-                                ctx.beginPath();
-                                ctx.arc(obj.x + obj.width/2, obj.y + obj.height/2, 8, 0, Math.PI * 2);
-                                ctx.fill();
-                            }
-                        }
-                        break;
-                        
-                    case 'door':
-                        ctx.fillStyle = gameState.doorUnlocked ? '#7cb342' : '#5d4037';
+                    case 'security_panel':
+                        ctx.fillStyle = gameState.exitUnlocked ? '#7cb342' : '#666666';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                        
-                        // Draw door details
+
+                        // Panel details
                         ctx.fillStyle = '#000';
-                        ctx.fillRect(obj.x + 10, obj.y + 20, 5, 120); // Door frame
-                        ctx.fillRect(obj.x + obj.width - 15, obj.y + 20, 5, 120); // Door frame
-                        
-                        // Draw door handle
-                        ctx.fillStyle = '#fffc00';
-                        ctx.beginPath();
-                        ctx.arc(obj.x + 60, obj.y + obj.height/2, 8, 0, Math.PI * 2);
-                        ctx.fill();
-                        break;
-                        
-                    case 'equipment':
-                        ctx.fillStyle = '#555577';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                        
-                        // Add equipment details
-                        ctx.fillStyle = '#4afcff';
-                        ctx.fillRect(obj.x + 10, obj.y + 10, 10, 10);
-                        ctx.fillRect(obj.x + obj.width - 20, obj.y + 10, 10, 10);
-                        break;
-                        
-                    case 'console':
-                        ctx.fillStyle = '#333355';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                        
-                        // Console screen
-                        ctx.fillStyle = '#4afcff';
                         ctx.fillRect(obj.x + 10, obj.y + 10, obj.width - 20, 20);
-                        
-                        // Console buttons
                         ctx.fillStyle = '#ff2c7d';
                         ctx.beginPath();
-                        ctx.arc(obj.x + 30, obj.y + 40, 5, 0, Math.PI * 2);
+                        ctx.arc(obj.x + obj.width/2, obj.y + obj.height - 20, 8, 0, Math.PI * 2);
                         ctx.fill();
+                        break;
+
+                    case 'vent':
+                        ctx.fillStyle = '#444466';
+                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+
+                        // Vent grille
+                        ctx.fillStyle = '#666688';
+                        for (let i = 0; i < 4; i++) {
+                            ctx.fillRect(obj.x + 5 + i * 15, obj.y + 5, 10, obj.height - 10);
+                        }
+                        break;
+
+                    case 'emergency_light':
+                        ctx.fillStyle = '#ff2c7d';
                         ctx.beginPath();
-                        ctx.arc(obj.x + 60, obj.y + 40, 5, 0, Math.PI * 2);
+                        ctx.arc(obj.x + obj.width/2, obj.y + obj.height/2, 15, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+
+                    case 'door_back':
+                        ctx.fillStyle = '#5d4037';
+                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+
+                        // Door details
+                        ctx.fillStyle = '#000';
+                        ctx.fillRect(obj.x + 10, obj.y + 20, 5, 120);
+                        ctx.fillRect(obj.x + obj.width - 15, obj.y + 20, 5, 120);
+
+                        // Door handle
+                        ctx.fillStyle = '#fffc00';
+                        ctx.beginPath();
+                        ctx.arc(obj.x + 20, obj.y + obj.height/2, 8, 0, Math.PI * 2);
                         ctx.fill();
                         break;
                 }
             });
-            
+
             // Draw player
             if (playerImage.complete) {
                 ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
@@ -468,7 +454,7 @@
                 ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
             }
         }
-        
+
         // Update game state
         function update() {
             // Move player
@@ -476,23 +462,23 @@
             if (keys['s'] || keys['arrowdown']) player.y += player.speed;
             if (keys['a'] || keys['arrowleft']) player.x -= player.speed;
             if (keys['d'] || keys['arrowright']) player.x += player.speed;
-            
+
             // Constrain player to room
             player.x = Math.max(player.radius + 30, Math.min(canvas.width - player.radius - 30, player.x));
             player.y = Math.max(player.radius + 30, Math.min(canvas.height - player.radius - 30, player.y));
-            
+
             // Check for nearby objects
             player.nearObject = null;
             roomObjects.forEach(obj => {
                 if (obj.interactive) {
                     const dist = Math.sqrt(
-                        Math.pow(player.x - (obj.x + obj.width/2), 2) + 
+                        Math.pow(player.x - (obj.x + obj.width/2), 2) +
                         Math.pow(player.y - (obj.y + obj.height/2), 2)
                     );
-                    
+
                     if (dist < 60) {
                         player.nearObject = obj;
-                        
+
                         // Position interaction hint near the object
                         interactionHint.style.left = `${obj.x}px`;
                         interactionHint.style.top = `${obj.y - 40}px`;
@@ -500,70 +486,65 @@
                     }
                 }
             });
-            
+
             // Hide interaction hint if not near any object
             if (!player.nearObject) {
                 interactionHint.style.opacity = '0';
             }
-            
+
             // Update timer
             updateTimer();
         }
-        
+
         // Update timer display
         function updateTimer() {
             const minutes = Math.floor(gameState.timer / 60);
             const seconds = gameState.timer % 60;
-            document.getElementById('timer').textContent = 
+            document.getElementById('timer').textContent =
                 `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
-        
+
         // Interact with objects
         function interactWithObject(obj) {
             switch (obj.type) {
-                case 'floor_tile':
-                    if (obj.isLoose && !gameState.tileLifted) {
+                case 'security_panel':
+                    if (!gameState.exitUnlocked) {
                         puzzleModal.style.display = 'block';
-                    } else if (obj.isLoose && gameState.tileLifted && obj.item && !gameState.hasKey) {
-                        gameState.hasKey = true;
-                        gameState.inventory.push('Access Key');
-                        updateInventory();
-                        updateTerminal("> You picked up the Access Key!");
-                    }
-                    break;
-                    
-                case 'door':
-                    if (obj.locked) {
-                        if (gameState.hasKey) {
-                            obj.locked = false;
-                            gameState.doorUnlocked = true;
-                            updateTerminal("> You used the Access Key to unlock the door!");
-                        } else {
-                            updateTerminal("> The door is locked. You need an Access Key.");
-                        }
                     } else {
-                        updateTerminal("> The door is unlocked. You can proceed to the next room.");
-                        // In a full game, this would transition to the next room
+                        updateTerminal("> The exit is unlocked. You have escaped!");
+                        // Game over - could redirect to win screen
+                        setTimeout(() => {
+                            alert("Congratulations! You have escaped the space station!");
+                            localStorage.removeItem('spaceStationGameState');
+                            window.location.href = '/';
+                        }, 2000);
                     }
                     break;
-                    
-                case 'console':
-                    updateTerminal("> The console displays: 'SYSTEM OFFLINE - MAINTENANCE REQUIRED'");
+
+                case 'vent':
+                    updateTerminal("> The vent is too small to crawl through.");
+                    break;
+
+                case 'door_back':
+                    updateTerminal("> Going back to the previous room.");
+                    gameState.currentRoom = 'room1';
+                    saveGameState();
+                    window.location.href = '/room1';
                     break;
             }
         }
-        
+
         // Update terminal text
         function updateTerminal(text) {
             const terminal = document.getElementById('terminal-content');
             terminal.innerHTML += `<br>${text}`;
             terminal.scrollTop = terminal.scrollHeight;
         }
-        
+
         // Update inventory display
         function updateInventory() {
             const inventoryElement = document.getElementById('inventory-items');
-            
+
             if (gameState.inventory.length === 0) {
                 inventoryElement.innerHTML = 'Empty';
             } else {
@@ -576,25 +557,33 @@
                 });
             }
         }
-        
+
         // Game loop
         function gameLoop() {
             update();
             drawRoom();
             requestAnimationFrame(gameLoop);
         }
-        
+
         // Timer countdown
         function startTimer() {
             setInterval(() => {
                 if (gameState.timer > 0) {
                     gameState.timer--;
                     updateTimer();
+                    saveGameState();
+                } else {
+                    // Time's up
+                    alert("Time's up! Game over.");
+                    localStorage.removeItem('spaceStationGameState');
+                    window.location.href = '/';
                 }
             }, 1000);
         }
-        
-        // Start the game
+
+        // Initialize game
+        loadGameState();
+        updateInventory();
         startTimer();
         gameLoop();
     </script>
