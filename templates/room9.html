@@ -382,8 +382,8 @@
         <div class="terminal">
             <div id="terminal-content">
                 > You are in a small broom closet on Space Station Omega.<br>
-                > The room is cramped with cleaning supplies and two lockers.<br>
-                > One locker seems to be slightly ajar. The other is locked.<br>
+                > The room is cramped with cleaning supplies.<br>
+                > You notice a small note on the floor and a door at the bottom.<br>
                 > Use WASD to move around and SPACE to interact with objects.
             </div>
         </div>
@@ -443,38 +443,19 @@
         const roomObjects = [
         {
             type: 'smallObject',
-            x: 400,
+            x: 550,
             y: 650,
             width: 2,
             height: 2,
             interactive: true,
-            item: 'Tiny Screw'
+            item: 'Note with "C"'
         },
-        {
-            type: 'smallObject',
-            x: 550,
-            y: 670,
-            width: 2,
-            height: 2,
-            interactive: true,
-            item: 'Micro Chip'
-        },
-        {
-            type: 'smallObject',
-            x: 700,
-            y: 660,
-            width: 2,
-            height: 2,
-            interactive: true,
-            item: 'Mini Battery'
-        },
-        // Replace the existing door object with:
         {
             type: 'door',
-            x: 550, // Center of the movement area
-            y: 740, // Bottom of canvas (750px) minus 10px margin
+            x: 550,
+            y: 740,
             width: 100,
-            height: 1, // 1 pixel height
+            height: 1,
             interactive: true
         }
         ];
@@ -813,23 +794,17 @@
             if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; player.direction = 'left'; moved = true; }
             if (keys['d'] || keys['arrowright']) { player.x += player.speed; player.direction = 'right'; moved = true; }
 
-            // Constrain player to the bounding box of kosteskab.gif image centered horizontally
-            // Adjusted to scaled background image dimensions
+            // Constrain player to the canvas
             const bgX = (canvas.width - bgScaledWidth) / 2;
             const bgY = 300; // top aligned
 
-            player.x = Math.max(player.radius + bgX, Math.min(bgX + bgScaledWidth - player.radius, player.x));
-            const bottomLimit = bgY + bgScaledHeight - player.radius - 10;            const topLimit = bottomLimit - 80;
-            player.y = Math.max(topLimit, Math.min(bottomLimit, player.y));
-
             const leftLimit = bgX + player.radius;
             const rightLimit = bgX + bgScaledWidth - player.radius;
+            player.x = Math.max(leftLimit, Math.min(rightLimit, player.x));
 
-            // Example: shrink horizontal band by 100px on each side
-            const restrictedLeft = leftLimit + 150;
-            const restrictedRight = rightLimit - 150;
-
-            player.x = Math.max(restrictedLeft, Math.min(restrictedRight, player.x));
+            const bottomLimit = canvas.height - player.radius - 10;
+            const topLimit = bottomLimit - 80;
+            player.y = Math.max(topLimit, Math.min(bottomLimit, player.y));
 
             // Check for nearby objects
             player.nearObject = null;
@@ -880,7 +855,7 @@
                     if (obj.item) {
                         gameState.inventory.push(obj.item);
                         updateInventory();
-                        updateTerminal("> You found a " + obj.item + "! It was barely visible.");
+                        updateTerminal("> You found a barely visible note with the letter 'C'.");
                         // Remove the object from the room
                         const index = roomObjects.indexOf(obj);
                         if (index > -1) {
@@ -929,13 +904,6 @@
                     }
                     break;
 
-                case 'door':
-                    updateTerminal("> The door leads back to the corridor.");
-                    // Transition to next room (would need to be implemented)
-                    // gameState.currentRoom = 'corridor';
-                    // saveGameState();
-                    // window.location.href = '/corridor';
-                    break;
             }
         }
 
