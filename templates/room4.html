@@ -36,7 +36,7 @@
         }
 
         #roomCanvas {
-            background-color: #000011;
+            background-color: transparent;
             width: 100%;
             height: 100%;
         }
@@ -127,12 +127,6 @@
             font-size: 1.5rem;
         }
 
-        .puzzle-image {
-            display: block;
-            margin: auto;
-            width: 75%;
-        }
-
         .puzzle-content {
             margin-bottom: 20px;
             line-height: 1.5;
@@ -177,15 +171,14 @@
 
         #inventory-items {
             margin-top: 10px;
-            height: 40px;
+            min-height: 40px;
             border: 1px solid #4afcff;
             border-radius: 5px;
             padding: 5px;
-            overflow-y: auto;
         }
 
         .inventory-item {
-            display: block;
+            display: inline-block;
             background-color: #4afcff;
             color: #0a0a2a;
             padding: 5px 10px;
@@ -258,6 +251,32 @@
             text-align: center;
         }
 
+        .note-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #1a1a3a;
+            border: 3px solid #4afcff;
+            border-radius: 10px;
+            padding: 20px;
+            width: 400px;
+            z-index: 100;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            display: none;
+        }
+
+        .note-text {
+            background-color: #0a0a2a;
+            border: 2px solid #4afcff;
+            border-radius: 5px;
+            color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            min-height: 150px;
+        }
+
         .settings-button {
             position: absolute;
             top: 10px;
@@ -300,8 +319,8 @@
     <h1>SPACE STATION ESCAPE - ROOM 4</h1>
 
     <div class="game-container">
-        <img id="bgImage" src="/static/engine.gif" style="position: absolute; top: 0; image-rendering: pixelated; z-index: 1;">
-        <canvas id="roomCanvas" width="1200" height="750" style="position: absolute; top: 0; z-index: 2;"></canvas>
+        <img id="bgImage" src="/static/engine.gif" style="position: absolute; top: 0; image-rendering: pixelated; z-index: -2;">
+        <canvas id="roomCanvas" width="1200" height="750" style="position: absolute; top: 0; z-index: -1;"></canvas>
 
         <div id="interactionHint" class="interaction-hint">
             Press SPACE to interact
@@ -310,7 +329,6 @@
         <div id="puzzleModal" class="puzzle-modal">
             <button class="close-button" id="closePuzzle">✕</button>
             <h2 class="puzzle-title">SOMETHING IN THE PILE...</h2>
-            <img class="puzzle-image" src="/static/engine_pile.gif" width="100%" style="image-rendering: pixelated">
             <p class="puzzle-content" id="puzzleContent">A pile of infested spacesuits lie on the floor. It reeks with parasites and a repellent odor.</p>
             <button class="puzzle-button" id="searchPile">Search it</button>
             <button class="puzzle-button" id="pickupWrench">Pick it up</button>
@@ -385,8 +403,8 @@
         const roomObjects = [
             {
                 type: 'pile_of_suits',
-                x: 80,
-                y: 370,
+                x: 640,
+                y: 540,
                 width: 80,
                 height: 80,
                 interactive: true,
@@ -394,7 +412,7 @@
             },
             {
                 type: 'fuel_tank',
-                x: 1080,
+                x: 780,
                 y: 370,
                 width: 60,
                 height: 105,
@@ -403,9 +421,9 @@
             },
             {
                 type: 'o2_cabinet',
-                x: 700,
-                y: 40,
-                width: 80,
+                x: 320,
+                y: 440,
+                width: 120,
                 height: 120,
                 interactive: true,
             }
@@ -417,7 +435,7 @@
             y: canvas.height / 2,
             radius: 15,
             color: '#4afcff',
-            speed: 3,
+            speed: 4,
             nearObject: null
         };
 
@@ -436,6 +454,13 @@
             x1: 0,
             y0: 0,
             y1: 0,
+        }
+
+        const roomBounds = {
+            x0: 350,
+            x1: 850,
+            y0: 410,
+            y1: 680,
         }
 
         let gameTime = 0
@@ -479,7 +504,7 @@
         searchPileBtn.addEventListener('click', () => {
             if (!gameState.hasWrench && !roomState.searchedPile) {
                 roomState.searchedPile = true;
-                puzzleContent.innerHTML = "Your hand sinks into the pile. Parasites rapidly start crawling up your arm. You use your other hand to brush them off. You find a wrench underneath the pile of suits!"
+                puzzleContent.innerHTML = "Your hand sinks into the pile. Parasites rapidly start crawling up your arm. You use your other hand to brush them off.<br/><br/>You find a wrench underneath the pile of suits!"
                 searchPileBtn.style.display = 'none'
                 pickupWrenchBtn.style.display = 'block'
             }
@@ -502,10 +527,10 @@
             ctx.resetTransform()
             let camX = camera.x + camera.shakeX
             let camY = camera.y + camera.shakeY
+            // Ambient camera movement
+            camX += 4 * Math.cos(1.6343 * gameTime)
+            camY += 4 * Math.sin(2.6234 * gameTime)
             ctx.translate(-camX, -camY)
-
-            // // Light ambient camera shake
-            // ctx.translate(4 * Math.cos(1.6343 * gameTime), 4 * Math.sin(2.6234 * gameTime))
 
             // // Draw background (space station floor)
             // ctx.fillStyle = '#222244';
@@ -534,8 +559,7 @@
             // ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
 
             // Set background img position and size
-            if (!bgLoaded) {
-                console.log(bgLoaded)
+            // if (!bgLoaded) {
                 if (bgImage.complete) {
                     // Get actual rendered canvas dimensions
                     const rect = canvas.getBoundingClientRect();
@@ -547,11 +571,10 @@
                     bgScaledHeight = renderedHeight;
                     // Calculate x to center the image horizontally
                     const x = (renderedWidth - bgScaledWidth) / 2;
-                    bgImage.style.left = x + 'px';
+                    bgImage.style.left = (x - camX) + 'px';
+                    bgImage.style.top = (-camY) + 'px';
                     bgImage.style.width = bgScaledWidth + 'px';
                     bgImage.style.height = bgScaledHeight + 'px';
-                    // Position player at bottom of background image, moved down 100px
-                    player.y = bgScaledHeight - 200;
                     bgLoaded = true;
                 } else {
                     bgImage.onload = () => {
@@ -568,7 +591,7 @@
                         bgLoaded = true;
                     };
                 }
-            }
+            // }
 
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -595,7 +618,7 @@
 
             // Draw player
             if (playerImage.complete) {
-                ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
+                ctx.drawImage(playerImage, player.x - 60, player.y - 120, 120, 240);
             } else {
                 // Fallback to circle if image not loaded
                 ctx.fillStyle = player.color;
@@ -616,8 +639,8 @@
             if (keys['d'] || keys['arrowright']) player.x += player.speed;
 
             // Constrain player to room
-            player.x = Math.max(player.radius + 30, Math.min(canvas.width - player.radius - 30, player.x));
-            player.y = Math.max(player.radius + 30, Math.min(canvas.height - player.radius - 30, player.y));
+            player.x = Math.max(roomBounds.x0 + player.radius + 30, Math.min(roomBounds.x1 - player.radius - 30, player.x));
+            player.y = Math.max(roomBounds.y0 + player.radius + 30, Math.min(roomBounds.y1 - player.radius - 30, player.y));
 
             // Move the camera to follow player
             camera.x = Math.min(Math.max(player.x - canvas.width / 2, cameraBounds.x0), cameraBounds.x1)
@@ -646,7 +669,7 @@
 
                         // Position interaction hint near the object
                         interactionHint.style.left = `${obj.x}px`;
-                        interactionHint.style.top = `${obj.y - 40}px`;
+                        interactionHint.style.top = `${obj.y - 60}px`;
                         interactionHint.style.opacity = '1';
                     }
                 }
