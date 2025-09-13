@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Station Escape - Room 1</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Space Station Escape - Room 3</title>
     <style>
         * {
             margin: 0;
@@ -232,20 +232,18 @@
     </style>
 </head>
 <body>
-    <h1>SPACE STATION ESCAPE - ROOM 1</h1>
+    <h1>SPACE STATION ESCAPE - ROOM 3</h1>
 
     <div class="game-container">
         <canvas id="roomCanvas" width="800" height="600"></canvas>
 
-        <div id="interactionHint" class="interaction-hint">
-            Press SPACE to interact
-        </div>
+        <!-- No interaction hint for room 3 -->
 
         <div id="puzzleModal" class="puzzle-modal">
             <button class="close-button" id="closePuzzle">✕</button>
-            <h2 class="puzzle-title">LOOSE FLOOR TILE</h2>
-            <p class="puzzle-content">You found a loose floor tile! It seems like something might be hidden underneath. Try to lift it.</p>
-            <button class="puzzle-button" id="liftTile">Lift Tile</button>
+            <h2 class="puzzle-title" id="puzzleTitle">SCREWDRIVER</h2>
+            <p class="puzzle-content" id="puzzleContent">You found a screwdriver! You can use it to open the air-conditioner.</p>
+            <button class="puzzle-button" id="closeScrewdriver">Close</button>
         </div>
 
         <div id="gameOverModal" class="game-over-modal">
@@ -263,7 +261,7 @@
             </div>
             <div class="status-item">
                 <span class="status-label">ROOM:</span>
-                <span id="room-name">Storage Bay</span>
+                <span id="room-name">Library</span>
             </div>
             <div class="status-item">
                 <span class="status-label">INVENTORY:</span>
@@ -273,10 +271,10 @@
 
         <div class="terminal">
             <div id="terminal-content">
-                > You are in the storage bay of Space Station Omega.<br>
-                > The room appears to be in disarray, with equipment scattered about.<br>
-                > One of the floor tiles seems loose. You should investigate.<br>
-                > Use WASD to move around and SPACE to interact with objects.
+                > You are in the library of Space Station Omega.<br />
+                > A small shelf of books is here, with one book sticking out.<br />
+                > The book is titled "Fahrenheit 451".<br />
+                > Try interacting with the book.
             </div>
         </div>
     </div>
@@ -284,12 +282,11 @@
     <script>
         // Game state
         let gameState = {
-            currentRoom: 'room1',
+            currentRoom: 'room3',
             timer: 600, // 10 minutes in seconds
             inventory: [],
-            hasKey: false,
-            tileLifted: false,
-            doorUnlocked: false
+            hasScrewdriver: false,
+            airConditionerOpen: false
         };
 
         // Load game state from localStorage
@@ -309,50 +306,26 @@
         const canvas = document.getElementById('roomCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Room layout and objects
+        // Room objects
         const roomObjects = [
             {
-                type: 'floor_tile',
+                type: 'book',
                 x: 350,
                 y: 250,
                 width: 40,
                 height: 40,
                 interactive: true,
-                isLoose: true,
-                item: 'key'
+                title: 'Fahrenheit 451',
+                revealedScrewdriver: false
             },
             {
-                type: 'door',
-                x: 700,
+                type: 'air_conditioner',
+                x: 600,
                 y: 200,
                 width: 80,
-                height: 160,
+                height: 60,
                 interactive: true,
                 locked: true
-            },
-            {
-                type: 'equipment',
-                x: 200,
-                y: 150,
-                width: 60,
-                height: 60,
-                interactive: false
-            },
-            {
-                type: 'equipment',
-                x: 500,
-                y: 350,
-                width: 80,
-                height: 40,
-                interactive: false
-            },
-            {
-                type: 'console',
-                x: 100,
-                y: 400,
-                width: 120,
-                height: 60,
-                interactive: true
             }
         ];
 
@@ -386,40 +359,23 @@
             keys[e.key.toLowerCase()] = false;
         });
 
-        // Interaction hint element
+        // Interaction hint element (not used in room 3)
         const interactionHint = document.getElementById('interactionHint');
+        if (interactionHint) {
+            interactionHint.style.opacity = '0';
+        }
 
         // Puzzle modal elements
         const puzzleModal = document.getElementById('puzzleModal');
         const closePuzzleBtn = document.getElementById('closePuzzle');
-        const liftTileBtn = document.getElementById('liftTile');
+        const closeScrewdriverBtn = document.getElementById('closeScrewdriver');
 
         // Close puzzle modal
         closePuzzleBtn.addEventListener('click', () => {
             puzzleModal.style.display = 'none';
         });
-
-        // Lift tile button
-        liftTileBtn.addEventListener('click', () => {
-            if (!gameState.tileLifted) {
-                gameState.tileLifted = true;
-                gameState.hasKey = true;
-                gameState.inventory.push('Access Key');
-                updateInventory();
-                updateTerminal("> You lifted the loose tile and found an Access Key!");
-                puzzleModal.style.display = 'none';
-                saveGameState();
-            }
-        });
-
-        // Game over modal elements
-        const gameOverModal = document.getElementById('gameOverModal');
-        const restartButton = document.getElementById('restartButton');
-
-        // Restart button
-        restartButton.addEventListener('click', () => {
-            localStorage.removeItem('spaceStationGameState');
-            window.location.href = '/room1';
+        closeScrewdriverBtn.addEventListener('click', () => {
+            puzzleModal.style.display = 'none';
         });
 
         // Draw the room
@@ -460,76 +416,40 @@
             // Draw objects
             roomObjects.forEach(obj => {
                 switch (obj.type) {
-                    case 'floor_tile':
-                        if (obj.isLoose) {
-                            // Draw as normal tile
-                            const tileX = Math.floor(obj.x / 40) * 40;
-                            const tileY = Math.floor(obj.y / 40) * 40;
-                            const isAlt = ((tileX / 40) + (tileY / 40)) % 2 === 0;
-                            ctx.fillStyle = isAlt ? '#333355' : '#2a2a44';
-                            ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                            // Add pixel art details
-                            ctx.fillStyle = '#444466';
-                            ctx.fillRect(obj.x + 2, obj.y + 2, 36, 36);
-                            ctx.fillStyle = '#3a3a55';
-                            ctx.fillRect(obj.x + 5, obj.y + 5, 30, 30);
+                    case 'book':
+                        // Draw small shelf
+                        ctx.fillStyle = '#654321';
+                        ctx.fillRect(obj.x - 10, obj.y + 30, 60, 10);
 
-                            if (!gameState.tileLifted) {
-                                // Make half black to indicate loose
-                                ctx.fillStyle = '#000000';
-                                ctx.fillRect(obj.x, obj.y, obj.width / 2, obj.height);
-                            } else if (obj.item && !gameState.hasKey) {
-                                // Draw key if not yet taken
-                                ctx.fillStyle = '#fffc00';
-                                ctx.beginPath();
-                                ctx.arc(obj.x + obj.width/2, obj.y + obj.height/2, 8, 0, Math.PI * 2);
-                                ctx.fill();
-                            }
+                        // Draw books on shelf
+                        ctx.fillStyle = '#a0522d';
+                        for (let i = 0; i < 5; i++) {
+                            ctx.fillRect(obj.x - 10 + i * 12, obj.y + 20, 10, 20);
                         }
-                        break;
 
-                    case 'door':
-                        ctx.fillStyle = gameState.doorUnlocked ? '#7cb342' : '#5d4037';
+                        // Draw the sticking out book
+                        ctx.fillStyle = '#ff4500';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
 
-                        // Draw door details
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(obj.x + 10, obj.y + 20, 5, 120); // Door frame
-                        ctx.fillRect(obj.x + obj.width - 15, obj.y + 20, 5, 120); // Door frame
-
-                        // Draw door handle
-                        ctx.fillStyle = '#fffc00';
-                        ctx.beginPath();
-                        ctx.arc(obj.x + 60, obj.y + obj.height/2, 8, 0, Math.PI * 2);
-                        ctx.fill();
+                        // Draw book title text (small)
+                        ctx.fillStyle = '#fff';
+                        ctx.font = '10px monospace';
+                        ctx.fillText('F451', obj.x + 5, obj.y + 25);
                         break;
 
-                    case 'equipment':
-                        ctx.fillStyle = '#555577';
+                    case 'air_conditioner':
+                        ctx.fillStyle = obj.locked ? '#555577' : '#7cb342';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
 
-                        // Add equipment details
-                        ctx.fillStyle = '#4afcff';
-                        ctx.fillRect(obj.x + 10, obj.y + 10, 10, 10);
-                        ctx.fillRect(obj.x + obj.width - 20, obj.y + 10, 10, 10);
-                        break;
-
-                    case 'console':
-                        ctx.fillStyle = '#333355';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-
-                        // Console screen
-                        ctx.fillStyle = '#4afcff';
-                        ctx.fillRect(obj.x + 10, obj.y + 10, obj.width - 20, 20);
-
-                        // Console buttons
-                        ctx.fillStyle = '#ff2c7d';
-                        ctx.beginPath();
-                        ctx.arc(obj.x + 30, obj.y + 40, 5, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.beginPath();
-                        ctx.arc(obj.x + 60, obj.y + 40, 5, 0, Math.PI * 2);
-                        ctx.fill();
+                        // Draw air-conditioner grill lines
+                        ctx.strokeStyle = '#333366';
+                        ctx.lineWidth = 2;
+                        for (let i = 0; i < 5; i++) {
+                            ctx.beginPath();
+                            ctx.moveTo(obj.x + 5, obj.y + 10 + i * 10);
+                            ctx.lineTo(obj.x + obj.width - 5, obj.y + 10 + i * 10);
+                            ctx.stroke();
+                        }
                         break;
                 }
             });
@@ -565,74 +485,45 @@
             roomObjects.forEach(obj => {
                 if (obj.interactive) {
                     const dist = Math.sqrt(
-                        Math.pow(player.x - (obj.x + obj.width/2), 2) +
-                        Math.pow(player.y - (obj.y + obj.height/2), 2)
+                        Math.pow(player.x - (obj.x + obj.width / 2), 2) +
+                        Math.pow(player.y - (obj.y + obj.height / 2), 2)
                     );
 
                     if (dist < 60) {
                         player.nearObject = obj;
-
-                        // Position interaction hint near the object
-                        interactionHint.style.left = `${obj.x}px`;
-                        interactionHint.style.top = `${obj.y - 40}px`;
-                        interactionHint.style.opacity = '1';
+                        // No interaction hint in room 3
                     }
                 }
             });
-
-            // Hide interaction hint if not near any object
-            if (!player.nearObject) {
-                interactionHint.style.opacity = '0';
-            }
-
-            // Update timer
-            updateTimer();
-        }
-
-        // Update timer display
-        function updateTimer() {
-            const minutes = Math.floor(gameState.timer / 60);
-            const seconds = gameState.timer % 60;
-            document.getElementById('timer').textContent =
-                `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
 
         // Interact with objects
         function interactWithObject(obj) {
             switch (obj.type) {
-                case 'floor_tile':
-                    if (obj.isLoose && !gameState.tileLifted) {
-                        puzzleModal.style.display = 'block';
-                    } else if (obj.isLoose && gameState.tileLifted && obj.item && !gameState.hasKey) {
-                        gameState.hasKey = true;
-                        gameState.inventory.push('Access Key');
+                case 'book':
+                    if (!gameState.hasScrewdriver) {
+                        gameState.hasScrewdriver = true;
+                        gameState.inventory.push('Screwdriver');
                         updateInventory();
-                        updateTerminal("> You picked up the Access Key!");
+                        updateTerminal("> You found a screwdriver hidden behind the book!");
+                        puzzleModal.style.display = 'block';
                         saveGameState();
                     }
                     break;
 
-                case 'door':
+                case 'air_conditioner':
                     if (obj.locked) {
-                        if (gameState.hasKey) {
+                        if (gameState.hasScrewdriver) {
                             obj.locked = false;
-                            gameState.doorUnlocked = true;
-                            updateTerminal("> You used the Access Key to unlock the door!");
+                            gameState.airConditionerOpen = true;
+                            updateTerminal("> You used the screwdriver to open the air-conditioner!");
                             saveGameState();
                         } else {
-                            updateTerminal("> The door is locked. You need an Access Key.");
+                            updateTerminal("> The air-conditioner is locked. You need a screwdriver to open it.");
                         }
                     } else {
-                        updateTerminal("> The door is unlocked. You can proceed to the next room.");
-                        // Transition to next room
-                        gameState.currentRoom = 'room2';
-                        saveGameState();
-                        window.location.href = '/room2';
+                        updateTerminal("> The air-conditioner is already open.");
                     }
-                    break;
-
-                case 'console':
-                    updateTerminal("> The console displays: 'SYSTEM OFFLINE - MAINTENANCE REQUIRED'");
                     break;
             }
         }
@@ -669,17 +560,55 @@
         }
 
         // Timer countdown
+        let timerInterval;
         function startTimer() {
-            setInterval(() => {
+            timerInterval = setInterval(() => {
                 if (gameState.timer > 0) {
                     gameState.timer--;
                     updateTimer();
                     saveGameState();
                 } else {
-                    gameOverModal.style.display = 'block';
+                    // Time's up - show game over modal
+                    clearInterval(timerInterval);
+                    showGameOver();
                 }
             }, 1000);
         }
+
+        // Update timer display
+        function updateTimer() {
+            const minutes = Math.floor(gameState.timer / 60);
+            const seconds = gameState.timer % 60;
+            document.getElementById('timer').textContent =
+                `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        // Show game over modal
+        function showGameOver() {
+            document.getElementById('gameOverModal').style.display = 'block';
+        }
+
+        // Restart game
+        document.getElementById('restartButton').addEventListener('click', () => {
+            // Reset game state
+            gameState = {
+                currentRoom: 'room3',
+                timer: 600,
+                inventory: [],
+                hasScrewdriver: false,
+                airConditionerOpen: false
+            };
+            // Clear localStorage
+            localStorage.removeItem('spaceStationGameState');
+            // Hide modal
+            document.getElementById('gameOverModal').style.display = 'none';
+            // Reset UI
+            updateInventory();
+            updateTimer();
+            updateTerminal("> Game restarted. You are back in the library.");
+            // Restart timer
+            startTimer();
+        });
 
         // Initialize game
         loadGameState();
