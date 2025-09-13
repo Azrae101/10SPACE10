@@ -26,8 +26,8 @@
 
         .game-container {
             position: relative;
-            width: 800px;
-            height: 500px;
+            width: 1200px;
+            height: 750px;
             margin-bottom: 20px;
             border: 4px solid #4afcff;
             border-radius: 10px;
@@ -43,7 +43,7 @@
 
         .ui-container {
             display: flex;
-            width: 800px;
+            width: 1200px;
             gap: 20px;
         }
 
@@ -253,10 +253,8 @@
     </style>
 </head>
 <body>
-    <h1>SPACE STATION ESCAPE - ROOM 1</h1>
-
     <div class="game-container">
-        <canvas id="roomCanvas" width="800" height="600"></canvas>
+        <canvas id="roomCanvas" width="1200" height="750"></canvas>
 
         <div id="interactionHint" class="interaction-hint">
             Press SPACE to interact
@@ -632,35 +630,33 @@
                 ctx.fill();
             });
 
-            // Draw flashlight light
-            if (gameState.inventory.includes('Flashlight')) {
-                ctx.globalCompositeOperation = 'lighter';
-                let lightX = player.x, lightY = player.y;
-                if (player.direction === 'up') lightY -= 100;
-                else if (player.direction === 'down') lightY += 100;
-                else if (player.direction === 'left') lightX -= 100;
-                else if (player.direction === 'right') lightX += 100;
-                ctx.fillStyle = 'rgba(255,255,200,0.4)'; // slightly yellow
-                ctx.beginPath();
-                ctx.arc(lightX, lightY, 80, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalCompositeOperation = 'source-over';
+        // Draw flashlight light
+        if (gameState.inventory.includes('Flashlight')) {
+            ctx.globalCompositeOperation = 'lighter';
+            let lightX = player.x, lightY = player.y;
+            if (player.direction === 'up') lightY -= 100;
+            else if (player.direction === 'down') lightY += 100;
+            else if (player.direction === 'left') lightX -= 100;
+            else if (player.direction === 'right') lightX += 100;
+            ctx.fillStyle = 'rgba(255,255,200,0.4)'; // slightly yellow
+            ctx.beginPath();
+            ctx.arc(lightX, lightY, 80, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
 
-                // Redraw player to prevent lightening, except when moving down
-                if (player.direction !== 'down') {
-                    if (playerImage.complete) {
-                        ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
-                    } else {
-                        // Fallback to circle if image not loaded
-                        ctx.fillStyle = player.color;
-                        ctx.beginPath();
-                        ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
-                    }
-                }
+            // Always redraw player to prevent lightening artifacts
+            if (playerImage.complete) {
+                ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
+            } else {
+                // Fallback to circle if image not loaded
+                ctx.fillStyle = player.color;
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
             }
+        }
         }
 
         // Update game state

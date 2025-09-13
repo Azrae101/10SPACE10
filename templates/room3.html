@@ -26,8 +26,8 @@
 
         .game-container {
             position: relative;
-            width: 800px;
-            height: 500px;
+            width: 1200px;
+            height: 750px;
             margin-bottom: 20px;
             border: 4px solid #4afcff;
             border-radius: 10px;
@@ -43,7 +43,7 @@
 
         .ui-container {
             display: flex;
-            width: 800px;
+            width: 1200px;
             gap: 20px;
         }
 
@@ -91,6 +91,18 @@
         #terminal-content {
             color: #e0e0e0;
             line-height: 1.4;
+        }
+
+        .interaction-hint {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
 
@@ -246,8 +258,12 @@
     <h1>SPACE STATION ESCAPE - ROOM 3</h1>
 
     <div class="game-container">
-        <canvas id="roomCanvas" width="800" height="600"></canvas>
+        <canvas id="roomCanvas" width="1200" height="750"></canvas>
         <img src="/static/New Piskel.gif" alt="Animated GIF" style="position: absolute; top: 85px; left: 580px; width: 100px; height: 70px; z-index: 10;">
+
+        <div id="interactionHint" class="interaction-hint">
+            Press SPACE to interact
+        </div>
 
 
 
@@ -627,6 +643,7 @@
             });
 
             // Check for nearby objects
+            const previousNearObject = player.nearObject;
             player.nearObject = null;
             roomObjects.forEach(obj => {
                 if (obj.interactive) {
@@ -641,6 +658,15 @@
                 }
             });
 
+            // Update interaction hint
+            const interactionHint = document.getElementById('interactionHint');
+            if (player.nearObject && !gameState.isPaused) {
+                interactionHint.style.opacity = '1';
+                interactionHint.style.left = `${player.nearObject.x + player.nearObject.width / 2 - 60}px`;
+                interactionHint.style.top = `${player.nearObject.y - 40}px`;
+            } else {
+                interactionHint.style.opacity = '0';
+            }
 
         }
 

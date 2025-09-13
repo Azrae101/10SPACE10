@@ -30,6 +30,10 @@ def room6():
 def room7():
     return render_template('room7.html')
 
+@app.route('/room8')
+def room8():
+    return render_template('room8.html')
+
 # For local testing only:
 if __name__ == '__main__':
     app.run(debug=True)
