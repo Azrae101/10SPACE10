@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Not Found | 404 Error</title>
+    <title>404 - Page Not Found | Spacecraft Navigation System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #4f46e5;
-            --secondary-color: #818cf8;
-            --accent-color: #f97316;
-            --light-color: #f8fafc;
-            --dark-color: #1e293b;
-            --success-color: #10b981;
+            --neon-blue: #0ff0fc;
+            --neon-purple: #8a2be2;
+            --neon-pink: #ff2a6d;
+            --dark-space: #0a0e17;
+            --deep-space: #050c29;
+            --spaceship-gray: #1a1a1a;
         }
         
         * {
@@ -22,9 +23,9 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f0f4ff 0%, #fdf2f8 100%);
-            color: var(--dark-color);
+            font-family: 'Share Tech Mono', monospace;
+            background: linear-gradient(to bottom, var(--deep-space), var(--dark-space));
+            color: #fff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -32,45 +33,93 @@
             justify-content: center;
             padding: 20px;
             line-height: 1.6;
+            overflow-x: hidden;
         }
         
-        .container {
+        .stars, .twinkling {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: -1;
+        }
+        
+        .stars {
+            background: #000 url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><circle cx="100" cy="50" r="1" fill="white" opacity="0.6"/><circle cx="300" cy="120" r="0.5" fill="white" opacity="0.8"/><circle cx="450" cy="230" r="0.7" fill="white" opacity="0.4"/><circle cx="600" cy="70" r="1.2" fill="white" opacity="0.7"/><circle cx="800" cy="180" r="0.8" fill="white" opacity="0.5"/><circle cx="250" cy="300" r="1.5" fill="white" opacity="0.9"/><circle cx="700" cy="350" r="0.6" fill="white" opacity="0.6"/></svg>') repeat top center;
+            z-index: -2;
+        }
+        
+        .twinkling {
+            background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><circle cx="150" cy="80" r="1" fill="white" opacity="0.2"/><circle cx="400" cy="150" r="0.8" fill="white" opacity="0.3"/><circle cx="550" cy="250" r="1.2" fill="white" opacity="0.4"/></svg>') repeat top center;
+            z-index: -1;
+            animation: move-twink-back 200s linear infinite;
+        }
+        
+        @keyframes move-twink-back {
+            from {background-position:0 0;}
+            to {background-position:-10000px 5000px;}
+        }
+        
+        .spaceship-container {
             max-width: 1000px;
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background: rgba(10, 14, 23, 0.8);
+            border: 1px solid var(--neon-blue);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 240, 252, 0.5);
             padding: 40px;
             position: relative;
             overflow: hidden;
         }
         
-        .container::before {
+        .spaceship-container::before {
             content: "";
             position: absolute;
-            top: -50px;
-            left: -50px;
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            background: rgba(79, 70, 229, 0.05);
-            z-index: 0;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            box-shadow: 0 0 15px 3px rgba(0, 240, 252, 0.7);
         }
         
-        .container::after {
-            content: "";
+        .spaceship-panel {
             position: absolute;
-            bottom: -80px;
-            right: -80px;
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: rgba(249, 115, 22, 0.05);
-            z-index: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: rgba(26, 26, 26, 0.9);
+            border-top: 1px solid var(--neon-blue);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 0.8rem;
+            color: var(--neon-blue);
+        }
+        
+        .panel-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .blink {
+            animation: blink 2s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
         
         .content {
@@ -80,62 +129,55 @@
         }
         
         .error-code {
+            font-family: 'Orbitron', sans-serif;
             font-size: 8rem;
-            font-weight: 800;
-            color: var(--primary-color);
+            font-weight: 700;
+            color: var(--neon-pink);
             margin-bottom: 10px;
             line-height: 1;
-            text-shadow: 3px 3px 0 rgba(79, 70, 229, 0.2);
+            text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-pink);
+            animation: glitch 5s infinite;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
         }
         
         h1 {
+            font-family: 'Orbitron', sans-serif;
             font-size: 2.5rem;
             margin-bottom: 20px;
-            color: var(--dark-color);
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
         }
         
         .message {
             font-size: 1.25rem;
             margin-bottom: 30px;
-            color: #64748b;
+            color: #a0a0b0;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
         }
         
-        .animation-container {
-            max-width: 300px;
+        .gif-container {
+            max-width: 400px;
             margin: 0 auto 30px;
-        }
-        
-        .search-box {
-            display: flex;
-            max-width: 500px;
-            margin: 0 auto 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            border-radius: 50px;
+            border: 2px solid var(--neon-purple);
+            border-radius: 5px;
+            box-shadow: 0 0 15px var(--neon-purple);
             overflow: hidden;
         }
         
-        .search-input {
-            flex: 1;
-            padding: 15px 20px;
-            border: none;
-            background: #f1f5f9;
-            font-size: 1rem;
-        }
-        
-        .search-button {
-            padding: 15px 25px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .search-button:hover {
-            background: var(--secondary-color);
+        .gif-container img {
+            width: 100%;
+            height: auto;
+            display: block;
         }
         
         .redirect-message {
@@ -145,9 +187,10 @@
             gap: 10px;
             margin-bottom: 30px;
             font-size: 1.1rem;
-            background: #f1f5f9;
+            background: rgba(26, 26, 26, 0.7);
             padding: 12px 20px;
-            border-radius: 50px;
+            border-radius: 5px;
+            border-left: 3px solid var(--neon-blue);
             max-width: 350px;
             margin-left: auto;
             margin-right: auto;
@@ -155,9 +198,10 @@
         
         .countdown {
             font-weight: bold;
-            color: var(--primary-color);
+            color: var(--neon-pink);
             min-width: 30px;
             display: inline-block;
+            text-shadow: 0 0 5px var(--neon-pink);
         }
         
         .button-group {
@@ -170,51 +214,78 @@
         
         .button {
             padding: 12px 25px;
-            border-radius: 50px;
+            border-radius: 3px;
             text-decoration: none;
             font-weight: 600;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid;
         }
         
         .button-primary {
-            background: var(--primary-color);
-            color: white;
+            background: rgba(0, 240, 252, 0.1);
+            color: var(--neon-blue);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 240, 252, 0.5);
         }
         
         .button-primary:hover {
-            background: var(--secondary-color);
+            background: rgba(0, 240, 252, 0.3);
+            box-shadow: 0 0 15px rgba(0, 240, 252, 0.8);
             transform: translateY(-2px);
         }
         
         .button-secondary {
-            background: white;
-            color: var(--dark-color);
-            border: 1px solid #cbd5e1;
+            background: rgba(138, 43, 226, 0.1);
+            color: var(--neon-purple);
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
         }
         
         .button-secondary:hover {
-            background: #f8fafc;
-            border-color: var(--primary-color);
+            background: rgba(138, 43, 226, 0.3);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.8);
             transform: translateY(-2px);
         }
         
         .footer {
             margin-top: 30px;
-            color: #94a3b8;
+            color: #606080;
             font-size: 0.9rem;
         }
         
-        /* Animation */
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .footer a {
+            color: var(--neon-blue);
+            text-decoration: none;
         }
         
-        .floating {
-            animation: float 5s ease-in-out infinite;
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Terminal text effect */
+        .terminal-text {
+            border-right: 2px solid var(--neon-blue);
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 4s steps(40, end), blink-caret 0.75s step-end infinite;
+            display: inline-block;
+            max-width: 100%;
+        }
+        
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: var(--neon-blue); }
         }
         
         /* Responsive design */
@@ -240,13 +311,13 @@
                 width: 100%;
                 justify-content: center;
             }
+            
+            .spaceship-container {
+                padding: 30px 20px;
+            }
         }
         
         @media (max-width: 480px) {
-            .container {
-                padding: 30px 20px;
-            }
-            
             .error-code {
                 font-size: 4rem;
             }
@@ -254,43 +325,55 @@
             h1 {
                 font-size: 1.75rem;
             }
+            
+            .spaceship-panel {
+                flex-direction: column;
+                height: auto;
+                padding: 5px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    
+    <div class="spaceship-container">
+        <div class="spaceship-panel">
+            <div class="panel-item"><i class="fas fa-shield-alt blink"></i> <span>SHIELDS: 42%</span></div>
+            <div class="panel-item"><i class="fas fa-bolt blink"></i> <span>POWER: 78%</span></div>
+            <div class="panel-item"><i class="fas fa-satellite blink"></i> <span>NAV: OFFLINE</span></div>
+            <div class="panel-item"><i class="fas fa-temperature-high blink"></i> <span>TEMP: -270°C</span></div>
+        </div>
+        
         <div class="content">
             <div class="error-code">404</div>
-            <h1>Oops! Page Not Found</h1>
+            <h1>DIMENSIONAL COORDINATES NOT FOUND</h1>
             
-            <div class="animation-container">
-                <svg class="floating" width="300" height="200" viewBox="0 0 500 300">
-                    <path fill="#4f46e5" d="M250,50 C300,30 400,70 400,120 C400,170 320,200 250,200 C180,200 100,170 100,120 C100,70 200,30 250,50 Z" opacity="0.1"/>
-                    <circle cx="250" cy="150" r="80" fill="#4f46e5" opacity="0.1"/>
-                    <circle cx="250" cy="150" r="50" fill="#4f46e5" opacity="0.1"/>
-                    <circle cx="250" cy="150" r="20" fill="#4f46e5"/>
-                    <path fill="none" stroke="#4f46e5" stroke-width="5" d="M150,50 L350,250 M350,50 L150,250"/>
-                </svg>
+            <div class="gif-container">
+                <img src="/static/404.gif" alt="Spaceship navigation error">
             </div>
             
             <p class="message">
-                The page you're looking for seems to have wandered off into the digital void. 
-                Don't worry though - we'll help you find your way back!
+                <span class="terminal-text">WARNING: The spatial coordinates you're trying to access do not exist in our navigation database. Possible causes: quantum fluctuation, temporal anomaly, or incorrect hyperlink trajectory.</span>
             </p>
             
             <div class="redirect-message">
-                <i class="fas fa-clock"></i>
-                <span>Redirecting in <span class="countdown" id="countdown">5</span> seconds</span>
+                <i class="fas fa-hourglass-half"></i>
+                <span>Auto-redirect in <span class="countdown" id="countdown">5</span> seconds</span>
             </div>
             
             <div class="button-group">
-                <a href="{1}" class="button button-primary">
-                    <i class="fas fa-arrow-left"></i> Go Back
+                <a href="/1" class="button button-primary">
+                    <i class="fas fa-arrow-left"></i> Return to previous sector
+                </a>
+                <a href="/" class="button button-secondary">
+                    <i class="fas fa-home"></i> Command bridge
                 </a>
             </div>
             
             <div class="footer">
-                <p>If you're not automatically redirected, <a href="{previous_url}">click here</a></p>
+                <p>If automatic redirect fails, <a href="/1">initiate manual navigation</a></p>
             </div>
         </div>
     </div>
@@ -305,23 +388,43 @@
             
             if (seconds <= 0) {
                 clearInterval(countdownInterval);
-                window.location.href = "{previous_url}";
+                window.location.href = "/1";
             }
         }, 1000);
         
-        // Search functionality
-        document.querySelector('.search-button').addEventListener('click', function() {
-            const searchQuery = document.querySelector('.search-input').value;
-            if (searchQuery.trim() !== '') {
-                window.location.href = '/search?q=' + encodeURIComponent(searchQuery);
-            }
+        // Add spaceship sound effect on hover over buttons
+        const buttons = document.querySelectorAll('.button');
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playBeep() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.2);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+        
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', playBeep);
         });
         
-        document.querySelector('.search-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.querySelector('.search-button').click();
-            }
-        });
+        // Add glitch effect randomly
+        setInterval(() => {
+            const glitch = document.querySelector('.error-code');
+            glitch.style.animation = 'none';
+            void glitch.offsetWidth; // Trigger reflow
+            glitch.style.animation = 'glitch 0.3s';
+        }, 3000);
     </script>
 </body>
 </html>
