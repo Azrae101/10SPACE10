@@ -132,6 +132,12 @@
             line-height: 1.5;
         }
 
+        .puzzle-image {
+            display: block;
+            width: 75%;
+            margin: auto;
+        }
+
         .puzzle-input {
             background-color: #0a0a2a;
             border: 2px solid #4afcff;
@@ -302,9 +308,10 @@
 
         <div id="puzzleModal" class="puzzle-modal">
             <button class="close-button" id="closePuzzle">✕</button>
-            <h2 class="puzzle-title">SOMETHING IN THE PILE...</h2>
-            <p class="puzzle-content">You found a wrench in the pile of spacesuits!</p>
-            <button class="puzzle-button" id="pickupWrench">Pick it up</button>
+            <h2 class="puzzle-title">BROKEN POD</h2>
+            <img class="puzzle-image" src="/static/lab_closeup.png" style="image-rendering: pixelated;"/>
+            <p class="puzzle-content">A familiar figure stares back at you...</p>
+            <button class="puzzle-button" id="pickupWrench">Proceed</button>
         </div>
     </div>
 
@@ -364,13 +371,12 @@
         // Room layout and objects
         const roomObjects = [
             {
-                type: 'pile_of_suits',
-                x: 80,
-                y: 370,
+                type: 'pod',
+                x: 3850,
+                y: 500,
                 width: 80,
                 height: 80,
                 interactive: true,
-                item: 'wrench'
             }
         ];
 
@@ -380,7 +386,7 @@
             y: canvas.height / 2,
             radius: 15,
             color: '#4afcff',
-            speed: 5,
+            speed: 25,
             nearObject: null
         };
 
@@ -454,14 +460,7 @@
 
         // Lift tile button
         pickupWrenchBtn.addEventListener('click', () => {
-            if (!gameState.hasWrench) {
-                gameState.hasWrench = true;
-                gameState.inventory.push('Wrench');
-                updateInventory();
-                updateTerminal("> You dug into the pile of suits and found a wrench!");
-                puzzleModal.style.display = 'none';
-                saveGameState();
-            }
+            puzzleModal.style.display = 'none';
         });
 
         // Draw the room
@@ -634,10 +633,10 @@
 
                     if (dist < 60) {
                         player.nearObject = obj;
-
+                        console.log("hello")
                         // Position interaction hint near the object
-                        interactionHint.style.left = `${obj.x}px`;
-                        interactionHint.style.top = `${obj.y - 40}px`;
+                        interactionHint.style.left = `${obj.x - camera.x}px`;
+                        interactionHint.style.top = `${obj.y - camera.y - 160}px`;
                         interactionHint.style.opacity = '1';
                     }
                 }
@@ -663,7 +662,7 @@
         // Interact with objects
         function interactWithObject(obj) {
             switch (obj.type) {
-                case 'pile_of_suits':
+                case 'pod':
                     if (!gameState.hasWrench) {
                         puzzleModal.style.display = 'block';
                     }
@@ -737,7 +736,7 @@
         }
 
         // Initialize game
-        loadGameState();
+        // loadGameState();
         updateInventory();
         startTimer();
         gameLoop();

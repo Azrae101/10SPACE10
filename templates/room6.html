@@ -407,8 +407,8 @@
 
         // Player properties
         const player = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
+            x: 0,
+            y: canvas.height,
             radius: 15,
             color: '#4afcff',
             speed: 4,
@@ -477,7 +477,7 @@
 
         // Pickup wrench button
         pickupWrenchBtn.addEventListener('click', () => {
-            updateTerminal("> You dug into the pile of suits and found a wrench!");
+            updateTerminal("> You closed the toilet lid and found a hidden note!");
             puzzleModal.style.display = 'none';
         });
 
@@ -502,16 +502,6 @@
                     ctx.drawImage(bgImage, 225, 0, 750, 750)
                 }
             }
-
-            // Draw objects
-            roomObjects.forEach(obj => {
-                switch (obj.type) {
-                    case 'toilet':
-                        ctx.fillStyle = '#444466';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                        break;
-                }
-            });
 
             // Draw player
             if (playerImage.complete) {
@@ -647,7 +637,7 @@
         }
 
         // Initialize game
-        loadGameState();
+        // loadGameState();
         updateInventory();
         startTimer();
         gameLoop();
