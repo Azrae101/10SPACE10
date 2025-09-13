@@ -26,8 +26,8 @@
 
         .game-container {
             position: relative;
-            width: 1200px;
-            height: 750px;
+            width: 1000px;
+            height: 1000px;
             margin-bottom: 20px;
             border: 4px solid #4afcff;
             border-radius: 10px;
@@ -43,7 +43,7 @@
 
         .ui-container {
             display: flex;
-            width: 1200px;
+            width: 1000px;
             gap: 20px;
         }
 
@@ -318,7 +318,7 @@
 <body>
     <div class="game-container">
         <img id="bgImage" src="/static/kosteskab.gif" style="position: absolute; top: 0; z-index: 1;">
-        <canvas id="roomCanvas" width="1200" height="750" style="position: absolute; top: 0; z-index: 2;"></canvas>
+        <canvas id="roomCanvas" width="1000" height="1000" style="position: absolute; top: 0; z-index: 2;"></canvas>
 
         <div id="interactionHint" class="interaction-hint">
             Press SPACE to interact
@@ -382,8 +382,8 @@
         <div class="terminal">
             <div id="terminal-content">
                 > You are in a small broom closet on Space Station Omega.<br>
-                > The room is cramped with cleaning supplies and two lockers.<br>
-                > One locker seems to be slightly ajar. The other is locked.<br>
+                > The room is cramped with cleaning supplies.<br>
+                > You notice a small note on the floor and a door at the bottom.<br>
                 > Use WASD to move around and SPACE to interact with objects.
             </div>
         </div>
@@ -441,58 +441,23 @@
 
         // Room layout and objects for broom closet
         const roomObjects = [
-            {
-                type: 'locker',
-                id: 'locker1',
-                x: 300,
-                y: 400,
-                width: 100,
-                height: 200,
-                interactive: true,
-                item: 'Wrench'
-            },
-            {
-                type: 'locker',
-                id: 'locker2',
-                x: 500,
-                y: 400,
-                width: 100,
-                height: 200,
-                interactive: true,
-                item: 'Note with "C"'
-            },
-            {
-                type: 'broom',
-                x: 700,
-                y: 500,
-                width: 10,
-                height: 100,
-                interactive: false
-            },
-            {
-                type: 'bucket',
-                x: 750,
-                y: 550,
-                width: 50,
-                height: 70,
-                interactive: false
-            },
-            {
-                type: 'shelf',
-                x: 200,
-                y: 300,
-                width: 200,
-                height: 300,
-                interactive: false
-            },
-            {
-                type: 'door',
-                x: 900,
-                y: 300,
-                width: 100,
-                height: 200,
-                interactive: true
-            }
+        {
+            type: 'smallObject',
+            x: 550,
+            y: 650,
+            width: 2,
+            height: 2,
+            interactive: true,
+            item: 'Note with "C"'
+        },
+        {
+            type: 'door',
+            x: 550,
+            y: 740,
+            width: 100,
+            height: 1,
+            interactive: true
+        }
         ];
 
         // Background image scaled dimensions
@@ -692,6 +657,10 @@
             // Draw objects
             roomObjects.forEach(obj => {
                 switch (obj.type) {
+                    case 'smallObject':
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; // Barely visible
+                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                        break;
                     case 'locker':
                         if (obj.id === 'locker1') {
                             // First locker (already open)
@@ -825,24 +794,17 @@
             if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; player.direction = 'left'; moved = true; }
             if (keys['d'] || keys['arrowright']) { player.x += player.speed; player.direction = 'right'; moved = true; }
 
-            // Constrain player to the bounding box of kosteskab.gif image centered horizontally
-            // Adjusted to scaled background image dimensions
+            // Constrain player to the canvas
             const bgX = (canvas.width - bgScaledWidth) / 2;
             const bgY = 300; // top aligned
 
-            player.x = Math.max(player.radius + bgX, Math.min(bgX + bgScaledWidth - player.radius, player.x));
-            const bottomLimit = bgY + bgScaledHeight - player.radius;
-            const topLimit = bottomLimit - 80;
-            player.y = Math.max(topLimit, Math.min(bottomLimit, player.y));
-
             const leftLimit = bgX + player.radius;
             const rightLimit = bgX + bgScaledWidth - player.radius;
+            player.x = Math.max(leftLimit, Math.min(rightLimit, player.x));
 
-            // Example: shrink horizontal band by 100px on each side
-            const restrictedLeft = leftLimit + 150;
-            const restrictedRight = rightLimit - 150;
-
-            player.x = Math.max(restrictedLeft, Math.min(restrictedRight, player.x));
+            const bottomLimit = canvas.height - player.radius - 10;
+            const topLimit = bottomLimit - 80;
+            player.y = Math.max(topLimit, Math.min(bottomLimit, player.y));
 
             // Check for nearby objects
             player.nearObject = null;
@@ -889,6 +851,28 @@
         // Interact with objects
         function interactWithObject(obj) {
             switch (obj.type) {
+                case 'smallObject':
+                    if (obj.item) {
+                        gameState.inventory.push(obj.item);
+                        updateInventory();
+                        updateTerminal("> You found a barely visible note with the letter 'C'.");
+                        // Remove the object from the room
+                        const index = roomObjects.indexOf(obj);
+                        if (index > -1) {
+                            roomObjects.splice(index, 1);
+                        }
+                        saveGameState();
+                    }
+                    break;
+
+                case 'door':
+                    updateTerminal("> You exit the broom closet and return to the corridor.");
+                    // Transition to room 8
+                    gameState.currentRoom = 'room8';
+                    saveGameState();
+                    window.location.href = '/8';
+                    break;
+
                 case 'locker':
                     if (obj.id === 'locker1') {
                         // First locker (already open)
@@ -920,13 +904,6 @@
                     }
                     break;
 
-                case 'door':
-                    updateTerminal("> The door leads back to the corridor.");
-                    // Transition to next room (would need to be implemented)
-                    // gameState.currentRoom = 'corridor';
-                    // saveGameState();
-                    // window.location.href = '/corridor';
-                    break;
             }
         }
 
