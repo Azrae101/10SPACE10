@@ -717,10 +717,14 @@
             // Constrain player to the bounding box of cockpit.gif image centered horizontally
             const bgX = (canvas.width - bgScaledWidth) / 2;
             const bgY = 0;
-            const bottomLimit = bgY + bgScaledHeight - player.radius - 10;
-            const topLimit = bottomLimit - 80;
 
-            player.x = Math.max(player.radius + bgX, Math.min(bgX + bgScaledWidth - player.radius, player.x));
+            const bottomLimit = bgY + bgScaledHeight - player.radius + 270; // allow going far down
+            const topLimit = bottomLimit - 200; // only allow 200px of vertical range
+
+            player.x = Math.max(
+                player.radius + bgX + 90,                             
+                Math.min(bgX + bgScaledWidth - player.radius - 70, player.x) // right bound -20
+            );
             player.y = Math.max(topLimit, Math.min(bottomLimit, player.y));
 
             // Check for nearby objects
