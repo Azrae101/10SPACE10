@@ -46,49 +46,10 @@ def room9():
 def room10():
     return render_template('room10.html')
 
-
 # Custom 404 handler
 @app.errorhandler(404)
 def page_not_found(e):
-    previous_url = request.referrer or "/"
-    html = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>404 Not Found</title>
-        <style>
-            body {{
-                font-family: Arial, sans-serif;
-                text-align: center;
-                background-color: #f8f8f8;
-                margin: 0;
-                padding: 50px;
-            }}
-            img {{
-                max-width: 400px;
-                margin: 20px 0;
-            }}
-            .message {{
-                font-size: 1.5rem;
-                margin-bottom: 20px;
-            }}
-        </style>
-        <meta http-equiv="refresh" content="5;url={previous_url}">
-    </head>
-    <body>
-        <h1>404 - Page Not Found</h1>
-        <div class="message">
-            Oops! The page you’re looking for doesn’t exist.<br>
-            Redirecting you back in 5 seconds...
-        </div>
-        <img src="/static/404.gif" alt="404 image">
-        <p><a href="{previous_url}">Click here if you are not redirected</a></p>
-    </body>
-    </html>
-    """
-    return render_template_string(html), 404
+    return render_template('404.html')
 
 # For local testing only:
 if __name__ == '__main__':

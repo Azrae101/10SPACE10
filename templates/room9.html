@@ -36,7 +36,7 @@
         }
 
         #roomCanvas {
-            background-color: #000011;
+            background-color: transparent;
             width: 100%;
             height: 100%;
         }
@@ -317,7 +317,8 @@
 </head>
 <body>
     <div class="game-container">
-        <canvas id="roomCanvas" width="1200" height="750"></canvas>
+        <img id="bgImage" src="/static/kosteskab.gif" style="position: absolute; top: 0; z-index: 1;">
+        <canvas id="roomCanvas" width="1200" height="750" style="position: absolute; top: 0; z-index: 2;"></canvas>
 
         <div id="interactionHint" class="interaction-hint">
             Press SPACE to interact
@@ -422,6 +423,10 @@
         const canvas = document.getElementById('roomCanvas');
         const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
+
+        // Background image element
+        const bgImage = document.getElementById('bgImage');
+        let bgLoaded = false;
 
         // Flashing lights
         let flashingLights = [];
@@ -558,7 +563,7 @@
         // Restart button
         restartButton.addEventListener('click', () => {
             localStorage.removeItem('spaceStationGameState');
-            window.location.href = '/room1';
+            window.location.href = '/1';
         });
 
         // Pause overlay element
@@ -587,38 +592,49 @@
         // Restart button in settings
         settingsRestartButton.addEventListener('click', () => {
             localStorage.removeItem('spaceStationGameState');
-            window.location.href = '/room1';
+            window.location.href = '/1';
         });
 
         // Draw the room (broom closet)
         function drawRoom() {
-        // Draw background as kosteskab.png centered horizontally
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        const bgImage = new Image();
-        bgImage.src = '/static/kosteskab.png';
-
-        // Draw the background image once loaded
-        if (bgImage.complete) {
-            // Calculate scale to make image height equal to canvas height, keep aspect ratio
-            const scale = canvas.height / bgImage.height;
-            bgScaledWidth = bgImage.width * scale;
-            bgScaledHeight = canvas.height;
-            // Calculate x to center the image horizontally
-            const x = (canvas.width - bgScaledWidth) / 2;
-            const y = 0; // top aligned
-            ctx.drawImage(bgImage, x, y, bgScaledWidth, bgScaledHeight);
-        } else {
-            bgImage.onload = () => {
-                const scale = canvas.height / bgImage.height;
-                bgScaledWidth = bgImage.width * scale;
-                bgScaledHeight = canvas.height;
-                const x = (canvas.width - bgScaledWidth) / 2;
-                const y = 0;
-                ctx.drawImage(bgImage, x, y, bgScaledWidth, bgScaledHeight);
-            };
+        // Set background img position and size
+        if (!bgLoaded) {
+            if (bgImage.complete) {
+                // Get actual rendered canvas dimensions
+                const rect = canvas.getBoundingClientRect();
+                const renderedWidth = rect.width;
+                const renderedHeight = rect.height;
+                // Calculate scale to make image height equal to rendered canvas height, keep aspect ratio
+                const scale = renderedHeight / bgImage.naturalHeight;
+                bgScaledWidth = bgImage.naturalWidth * scale;
+                bgScaledHeight = renderedHeight;
+                // Calculate x to center the image horizontally
+                const x = (renderedWidth - bgScaledWidth) / 2;
+                bgImage.style.left = x + 'px';
+                bgImage.style.width = bgScaledWidth + 'px';
+                bgImage.style.height = bgScaledHeight + 'px';
+                // Position player at bottom of background image, moved down 100px
+                player.y = bgScaledHeight - 200;
+                bgLoaded = true;
+            } else {
+                bgImage.onload = () => {
+                    const rect = canvas.getBoundingClientRect();
+                    const renderedWidth = rect.width;
+                    const renderedHeight = rect.height;
+                    const scale = renderedHeight / bgImage.naturalHeight;
+                    bgScaledWidth = bgImage.naturalWidth * scale;
+                    bgScaledHeight = renderedHeight;
+                    const x = (renderedWidth - bgScaledWidth) / 2;
+                    bgImage.style.left = x + 'px';
+                    bgImage.style.width = bgScaledWidth + 'px';
+                    bgImage.style.height = bgScaledHeight + 'px';
+                    bgLoaded = true;
+                };
+            }
         }
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Draw objects
         roomObjects.forEach(obj => {
@@ -756,7 +772,7 @@
             if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; player.direction = 'left'; moved = true; }
             if (keys['d'] || keys['arrowright']) { player.x += player.speed; player.direction = 'right'; moved = true; }
 
-            // Constrain player to the bounding box of kosteskab.png image centered horizontally
+            // Constrain player to the bounding box of kosteskab.gif image centered horizontally
             // Adjusted to scaled background image dimensions
             const bgX = (canvas.width - bgScaledWidth) / 2;
             const bgY = 0; // top aligned

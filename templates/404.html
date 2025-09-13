@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found | 404 Error</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #818cf8;
+            --accent-color: #f97316;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+            --success-color: #10b981;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #fdf2f8 100%);
+            color: var(--dark-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(79, 70, 229, 0.05);
+            z-index: 0;
+        }
+        
+        .container::after {
+            content: "";
+            position: absolute;
+            bottom: -80px;
+            right: -80px;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: rgba(249, 115, 22, 0.05);
+            z-index: 0;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+        
+        .error-code {
+            font-size: 8rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            line-height: 1;
+            text-shadow: 3px 3px 0 rgba(79, 70, 229, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+        }
+        
+        .message {
+            font-size: 1.25rem;
+            margin-bottom: 30px;
+            color: #64748b;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .animation-container {
+            max-width: 300px;
+            margin: 0 auto 30px;
+        }
+        
+        .search-box {
+            display: flex;
+            max-width: 500px;
+            margin: 0 auto 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            background: #f1f5f9;
+            font-size: 1rem;
+        }
+        
+        .search-button {
+            padding: 15px 25px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .search-button:hover {
+            background: var(--secondary-color);
+        }
+        
+        .redirect-message {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+            background: #f1f5f9;
+            padding: 12px 20px;
+            border-radius: 50px;
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .countdown {
+            font-weight: bold;
+            color: var(--primary-color);
+            min-width: 30px;
+            display: inline-block;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .button {
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .button-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .button-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .button-secondary {
+            background: white;
+            color: var(--dark-color);
+            border: 1px solid #cbd5e1;
+        }
+        
+        .button-secondary:hover {
+            background: #f8fafc;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            margin-top: 30px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        /* Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .floating {
+            animation: float 5s ease-in-out infinite;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 6rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .message {
+                font-size: 1.1rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .error-code {
+                font-size: 4rem;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <div class="error-code">404</div>
+            <h1>Oops! Page Not Found</h1>
+            
+            <div class="animation-container">
+                <svg class="floating" width="300" height="200" viewBox="0 0 500 300">
+                    <path fill="#4f46e5" d="M250,50 C300,30 400,70 400,120 C400,170 320,200 250,200 C180,200 100,170 100,120 C100,70 200,30 250,50 Z" opacity="0.1"/>
+                    <circle cx="250" cy="150" r="80" fill="#4f46e5" opacity="0.1"/>
+                    <circle cx="250" cy="150" r="50" fill="#4f46e5" opacity="0.1"/>
+                    <circle cx="250" cy="150" r="20" fill="#4f46e5"/>
+                    <path fill="none" stroke="#4f46e5" stroke-width="5" d="M150,50 L350,250 M350,50 L150,250"/>
+                </svg>
+            </div>
+            
+            <p class="message">
+                The page you're looking for seems to have wandered off into the digital void. 
+                Don't worry though - we'll help you find your way back!
+            </p>
+            
+            <div class="redirect-message">
+                <i class="fas fa-clock"></i>
+                <span>Redirecting in <span class="countdown" id="countdown">5</span> seconds</span>
+            </div>
+            
+            <div class="button-group">
+                <a href="{1}" class="button button-primary">
+                    <i class="fas fa-arrow-left"></i> Go Back
+                </a>
+            </div>
+            
+            <div class="footer">
+                <p>If you're not automatically redirected, <a href="{previous_url}">click here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Countdown timer
+        let seconds = 5;
+        const countdownElement = document.getElementById('countdown');
+        const countdownInterval = setInterval(function() {
+            seconds--;
+            countdownElement.textContent = seconds;
+            
+            if (seconds <= 0) {
+                clearInterval(countdownInterval);
+                window.location.href = "{previous_url}";
+            }
+        }, 1000);
+        
+        // Search functionality
+        document.querySelector('.search-button').addEventListener('click', function() {
+            const searchQuery = document.querySelector('.search-input').value;
+            if (searchQuery.trim() !== '') {
+                window.location.href = '/search?q=' + encodeURIComponent(searchQuery);
+            }
+        });
+        
+        document.querySelector('.search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.querySelector('.search-button').click();
+            }
+        });
+    </script>
+</body>
+</html>

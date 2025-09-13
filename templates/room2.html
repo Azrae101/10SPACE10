@@ -525,7 +525,7 @@
         // Restart button
         restartButton.addEventListener('click', () => {
             localStorage.removeItem('spaceStationGameState');
-            window.location.href = '/room1';
+            window.location.href = '/1';
         });
 
         // Pause overlay element
@@ -554,7 +554,7 @@
         // Restart button in settings
         settingsRestartButton.addEventListener('click', () => {
             localStorage.removeItem('spaceStationGameState');
-            window.location.href = '/room1';
+            window.location.href = '/1';
         });
 
         // Draw the room
@@ -803,7 +803,7 @@
                     updateTerminal("> Going back to the previous room.");
                     gameState.currentRoom = 'room1';
                     saveGameState();
-                    window.location.href = '/room1';
+                    window.location.href = '/1';
                     break;
                     
                 case 'console':
