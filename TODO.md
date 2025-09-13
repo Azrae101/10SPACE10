@@ -1,0 +1,5 @@
+- [x] Add settings to room3.html
+- [ ] Add settings to room6.html
+- [ ] Add settings to room7.html
+- [ ] Add settings to room8.html
+- [ ] Add settings to room9.html

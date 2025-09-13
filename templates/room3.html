@@ -243,6 +243,43 @@
             text-shadow: 0 0 20px rgba(74, 252, 255, 0.5);
             text-align: center;
         }
+
+        .settings-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #4afcff;
+            color: #4afcff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 10;
+        }
+
+        .settings-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #4afcff;
+            display: none;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .settings-option {
+            background: none;
+            border: none;
+            color: #4afcff;
+            padding: 10px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .settings-option:hover {
+            background: rgba(74,252,255,0.2);
+        }
     </style>
 </head>
 <body>
@@ -265,6 +302,12 @@
 
         <div id="pauseOverlay" class="pause-overlay">
             <h1 class="pause-title">PAUSED</h1>
+        </div>
+
+        <button id="settingsButton" class="settings-button">⚙️</button>
+        <div id="settingsDropdown" class="settings-dropdown">
+            <button id="pauseResumeButton" class="settings-option">Pause</button>
+            <button id="settingsRestartButton" class="settings-option">Restart</button>
         </div>
     </div>
 
@@ -780,12 +823,67 @@
         // Pause button
         const pauseButton = document.getElementById('pauseButton');
         const pauseOverlay = document.getElementById('pauseOverlay');
+
+        // Settings elements
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsDropdown = document.getElementById('settingsDropdown');
+        const pauseResumeButton = document.getElementById('pauseResumeButton');
+        const settingsRestartButton = document.getElementById('settingsRestartButton');
+
         pauseButton.addEventListener('click', () => {
             gameState.isPaused = !gameState.isPaused;
             pauseButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
+            pauseResumeButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
             // Show or hide pause overlay
             pauseOverlay.style.display = gameState.isPaused ? 'flex' : 'none';
             saveGameState();
+        });
+
+        // Settings button
+        settingsButton.addEventListener('click', () => {
+            settingsDropdown.style.display = settingsDropdown.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        // Pause/Resume from settings
+        pauseResumeButton.addEventListener('click', () => {
+            gameState.isPaused = !gameState.isPaused;
+            pauseResumeButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
+            pauseButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
+            pauseOverlay.style.display = gameState.isPaused ? 'flex' : 'none';
+            settingsDropdown.style.display = 'none';
+            saveGameState();
+        });
+
+        // Restart from settings
+        settingsRestartButton.addEventListener('click', () => {
+            // Reset game state
+            gameState = {
+                currentRoom: 'room3',
+                timer: 600,
+                inventory: [],
+                hasScrewdriver: false,
+                airConditionerOpen: false,
+                isPaused: false
+            };
+            // Reset room objects
+            roomObjects.forEach(obj => {
+                if (obj.type === 'robot') obj.pickedUp = false;
+                if (obj.type === 'air_conditioner') obj.locked = true;
+            });
+            // Clear localStorage
+            localStorage.removeItem('spaceStationGameState');
+            // Hide modal
+            document.getElementById('gameOverModal').style.display = 'none';
+            // Reset UI
+            updateInventory();
+            updateTimer();
+            updateTerminal("> Game restarted. You are back in the library.");
+            // Reset buttons
+            pauseButton.textContent = 'Pause';
+            pauseResumeButton.textContent = 'Pause';
+            // Restart timer
+            startTimer();
+            settingsDropdown.style.display = 'none';
         });
 
         // Update timer display
@@ -825,8 +923,9 @@
             updateInventory();
             updateTimer();
             updateTerminal("> Game restarted. You are back in the library.");
-            // Reset pause button
+            // Reset buttons
             pauseButton.textContent = 'Pause';
+            pauseResumeButton.textContent = 'Pause';
             // Restart timer
             startTimer();
         });
