@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Station Escape - Room 1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000011;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            position: relative;
+            width: 1200px;
+            height: 750px;
+            margin-bottom: 20px;
+            border: 4px solid #4afcff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(74, 252, 255, 0.3);
+        }
+
+        #roomCanvas {
+            background-color: #000011;
+            width: 100%;
+            height: 100%;
+        }
+
+        .ui-container {
+            display: flex;
+            width: 1200px;
+            gap: 20px;
+        }
+
+        .status-panel {
+            background-color: rgba(0, 20, 40, 0.8);
+            border: 2px solid #4afcff;
+            border-radius: 8px;
+            padding: 15px;
+            width: 200px;
+        }
+
+        .terminal {
+            background-color: rgba(0, 20, 40, 0.8);
+            border: 2px solid #4afcff;
+            border-radius: 8px;
+            padding: 15px;
+            flex: 1;
+            height: 250px;
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #4afcff;
+            text-shadow: 0 0 10px rgba(74, 252, 255, 0.5);
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
+        .status-item {
+            margin-bottom: 10px;
+        }
+
+        .status-label {
+            color: #ff2c7d;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        #timer {
+            font-size: 1.5rem;
+            color: #4afcff;
+        }
+
+        #terminal-content {
+            color: #e0e0e0;
+            line-height: 1.4;
+        }
+
+        .interaction-hint {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .puzzle-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #1a1a3a;
+            border: 3px solid #4afcff;
+            border-radius: 10px;
+            padding: 20px;
+            width: 400px;
+            z-index: 100;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            display: none;
+        }
+
+        .puzzle-title {
+            color: #4afcff;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .puzzle-content {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .puzzle-image {
+            display: block;
+            width: 75%;
+            margin: auto;
+        }
+
+        .puzzle-input {
+            background-color: #0a0a2a;
+            border: 2px solid #4afcff;
+            border-radius: 5px;
+            color: white;
+            padding: 8px;
+            width: 100%;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .puzzle-button {
+            background-color: #4afcff;
+            color: #0a0a2a;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .puzzle-button:hover {
+            background-color: #3aa8d0;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        #inventory-items {
+            margin-top: 10px;
+            height: 40px;
+            border: 1px solid #4afcff;
+            border-radius: 5px;
+            padding: 5px;
+            overflow-y: auto;
+        }
+
+        .inventory-item {
+            display: block;
+            background-color: #4afcff;
+            color: #0a0a2a;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin: 3px;
+            font-weight: bold;
+        }
+
+        .game-over-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #1a1a3a;
+            border: 3px solid #ff2c7d;
+            border-radius: 10px;
+            padding: 30px;
+            width: 500px;
+            z-index: 200;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            display: none;
+            text-align: center;
+        }
+
+        .game-over-title {
+            color: #ff2c7d;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .game-over-content {
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .game-over-button {
+            background-color: #ff2c7d;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 15px 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: background-color 0.3s;
+        }
+
+        .game-over-button:hover {
+            background-color: #cc1a5a;
+        }
+
+        .pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 150;
+            display: none;
+        }
+
+        .pause-title {
+            color: #4afcff;
+            font-size: 4rem;
+            text-shadow: 0 0 20px rgba(74, 252, 255, 0.5);
+            text-align: center;
+        }
+
+        .settings-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #4afcff;
+            color: #4afcff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 10;
+        }
+
+        .settings-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #4afcff;
+            display: none;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .settings-option {
+            background: none;
+            border: none;
+            color: #4afcff;
+            padding: 10px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .settings-option:hover {
+            background: rgba(74,252,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>SPACE STATION ESCAPE - ROOM 5</h1>
+
+    <div class="game-container">
+        <canvas id="roomCanvas" width="1200" height="750"></canvas>
+
+        <div id="interactionHint" class="interaction-hint">
+            Press SPACE to interact
+        </div>
+
+        <div id="puzzleModal" class="puzzle-modal">
+            <button class="close-button" id="closePuzzle">✕</button>
+            <h2 class="puzzle-title">BROKEN POD</h2>
+            <img class="puzzle-image" src="/static/lab_closeup.png" style="image-rendering: pixelated;"/>
+            <p class="puzzle-content">A familiar figure stares back at you...</p>
+            <button class="puzzle-button" id="pickupWrench">Proceed</button>
+        </div>
+    </div>
+
+    <div class="ui-container">
+        <div class="status-panel">
+            <div class="status-item">
+                <span class="status-label">TIME REMAINING:</span>
+                <div id="timer">10:00</div>
+            </div>
+            <div class="status-item">
+                <span class="status-label">ROOM:</span>
+                <span id="room-name">Engine Room</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">INVENTORY:</span>
+                <div id="inventory-items">Empty</div>
+            </div>
+        </div>
+
+        <div class="terminal">
+            <div id="terminal-content">
+                > You are in the engine room of Space Station Omega.<br>
+                > You see a pile of spacesuits in the corner. You should investigate.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            currentRoom: 'room5',
+            timer: 600, // 10 minutes in seconds
+            inventory: [],
+            hasKey: false,
+            tileLifted: false,
+            doorUnlocked: false,
+            hasWrench: false,
+        };
+
+        // Load game state from localStorage
+        function loadGameState() {
+            const savedState = localStorage.getItem('spaceStationGameState');
+            if (savedState) {
+                gameState = JSON.parse(savedState);
+            }
+        }
+
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('spaceStationGameState', JSON.stringify(gameState));
+        }
+
+        // Canvas setup
+        const canvas = document.getElementById('roomCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Room layout and objects
+        const roomObjects = [
+            {
+                type: 'pod',
+                x: 3850,
+                y: 500,
+                width: 80,
+                height: 80,
+                interactive: true,
+            }
+        ];
+
+        // Player properties
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 15,
+            color: '#4afcff',
+            speed: 25,
+            nearObject: null
+        };
+
+        // Camera properties, for scrolling rooms and shake effects
+        const camera = {
+            x: 0,
+            y: 0,
+            shakeX: 0,
+            shakeY: 0,
+            shakeVelX: 0,
+            shakeVelY: 0,
+        }
+
+        const cameraBounds = {
+            x0: 0,
+            x1: 4050,
+            y0: 0,
+            y1: 0,
+        }
+
+        const roomBounds = {
+            x0: 0,
+            x1: 5250,
+            y0: 460,
+            y1: 620,
+        }
+
+        let gameTime = 0
+
+        // Load player image
+        const playerImage = new Image();
+        playerImage.src = '/static/chr.png';
+
+        const bgImage = new Image(600, 4200);
+        bgImage.src = '/static/bg_room_5.png'
+
+        // const darkImage = new Image();
+        // darkImage.src = '/static/dark.png';
+
+        const darkFlashlightImage = new Image();
+        darkFlashlightImage.src = '/static/dark_flashlight.png'
+
+        // Input handling
+        const keys = {};
+
+        window.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+
+            // Handle interaction
+            if (e.key === ' ' && player.nearObject) {
+                interactWithObject(player.nearObject);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        // Interaction hint element
+        const interactionHint = document.getElementById('interactionHint');
+
+        // Puzzle modal elements
+        const puzzleModal = document.getElementById('puzzleModal');
+        const closePuzzleBtn = document.getElementById('closePuzzle');
+        const pickupWrenchBtn = document.getElementById('pickupWrench');
+
+        // Close puzzle modal
+        closePuzzleBtn.addEventListener('click', () => {
+            puzzleModal.style.display = 'none';
+        });
+
+        // Lift tile button
+        pickupWrenchBtn.addEventListener('click', () => {
+            puzzleModal.style.display = 'none';
+        });
+
+        // Draw the room
+        function drawRoom() {
+            ctx.imageSmoothingEnabled = false;
+            ctx.resetTransform()
+            let camX = camera.x + camera.shakeX
+            let camY = camera.y + camera.shakeY
+            ctx.translate(-camX, -camY)
+
+            // Light ambient camera shake
+            ctx.translate(4 * Math.cos(1.6343 * gameTime), 4 * Math.sin(2.6234 * gameTime))
+
+            // Draw background (space station floor)
+            ctx.fillStyle = '#222244';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background
+            if (bgImage.complete) {
+                ctx.drawImage(bgImage, 0, 0, 5250, 750);
+            }
+
+            // Draw objects
+            roomObjects.forEach(obj => {
+                switch (obj.type) {
+                    case 'floor_tile':
+                        if (obj.isLoose) {
+                            // Draw as normal tile
+                            const tileX = Math.floor(obj.x / 40) * 40;
+                            const tileY = Math.floor(obj.y / 40) * 40;
+                            const isAlt = ((tileX / 40) + (tileY / 40)) % 2 === 0;
+                            ctx.fillStyle = isAlt ? '#111122' : '#0a0a22';
+                            ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                            // Add pixel art details
+                            ctx.fillStyle = '#222233';
+                            ctx.fillRect(obj.x + 2, obj.y + 2, 36, 36);
+                            ctx.fillStyle = '#1a1a33';
+                            ctx.fillRect(obj.x + 5, obj.y + 5, 30, 30);
+
+                            if (!gameState.tileLifted) {
+                                // Make half black to indicate loose
+                                ctx.fillStyle = '#000000';
+                                ctx.fillRect(obj.x, obj.y, obj.width / 2, obj.height);
+                            } else if (obj.item && !gameState.hasKey) {
+                                // Draw key if not yet taken
+                                ctx.fillStyle = '#fffc00';
+                                ctx.beginPath();
+                                ctx.arc(obj.x + obj.width/2, obj.y + obj.height/2, 8, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        }
+                        break;
+
+                    case 'door':
+                        ctx.fillStyle = gameState.doorUnlocked ? '#4a5d2a' : '#2a201b';
+                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+
+                        // Draw door details
+                        ctx.fillStyle = '#000';
+                        ctx.fillRect(obj.x + 10, obj.y + 20, 5, 120); // Door frame
+                        ctx.fillRect(obj.x + obj.width - 15, obj.y + 20, 5, 120); // Door frame
+
+                        // Draw door handle
+                        ctx.fillStyle = '#fffc00';
+                        ctx.beginPath();
+                        ctx.arc(obj.x + 60, obj.y + obj.height/2, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+
+                    case 'equipment':
+                        ctx.fillStyle = '#333344';
+                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+
+                        // Add equipment details
+                        ctx.fillStyle = '#4afcff';
+                        ctx.fillRect(obj.x + 10, obj.y + 10, 10, 10);
+                        ctx.fillRect(obj.x + obj.width - 20, obj.y + 10, 10, 10);
+                        break;
+
+                    case 'console':
+                        ctx.fillStyle = '#111122';
+                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+
+                        // Console screen
+                        ctx.fillStyle = '#4afcff';
+                        ctx.fillRect(obj.x + 10, obj.y + 10, obj.width - 20, 20);
+
+                        // Console buttons
+                        ctx.shadowColor = '#ff2c7d';
+                        ctx.shadowBlur = 10;
+                        ctx.fillStyle = '#ff2c7d';
+                        ctx.beginPath();
+                        ctx.arc(obj.x + 30, obj.y + 40, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(obj.x + 60, obj.y + 40, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                        break;
+
+                    case 'flashlight':
+                        // Only draw if not in inventory
+                        if (!gameState.inventory.includes('Flashlight')) {
+                            // Draw flashlight body (cylinder-like)
+                            ctx.fillStyle = '#333333';
+                            ctx.fillRect(obj.x + 2, obj.y, obj.width - 4, obj.height);
+                            // Draw lens
+                            ctx.fillStyle = '#ffff00';
+                            ctx.beginPath();
+                            ctx.arc(obj.x + obj.width / 2, obj.y + obj.height / 2, 8, 0, Math.PI * 2);
+                            ctx.fill();
+                            // Draw switch
+                            ctx.fillStyle = '#666666';
+                            ctx.fillRect(obj.x + obj.width - 5, obj.y + 5, 3, 10);
+                        }
+                        break;
+                }
+            });
+
+            // Draw player
+            if (playerImage.complete) {
+                ctx.drawImage(playerImage, player.x - 80, player.y - 160, 160, 320);
+            } else {
+                // Fallback to circle if image not loaded
+                ctx.fillStyle = player.color;
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
+            }
+
+            // Draw darkness
+            // ctx.drawImage(darkImage, player.x - 1536, player.y - 1152, 3072, 2304)
+            ctx.drawImage(darkFlashlightImage, player.x - 1536, player.y - 1152, 3072, 2304)
+        }
+
+        // Update game state
+        function update() {
+            // Move player
+            if (keys['w'] || keys['arrowup']) player.y -= player.speed;
+            if (keys['s'] || keys['arrowdown']) player.y += player.speed;
+            if (keys['a'] || keys['arrowleft']) player.x -= player.speed;
+            if (keys['d'] || keys['arrowright']) player.x += player.speed;
+
+            // Constrain player to room
+            player.x = Math.max(roomBounds.x0 + player.radius + 30, Math.min(roomBounds.x1 - player.radius - 30, player.x));
+            player.y = Math.max(roomBounds.y0 + player.radius + 30, Math.min(roomBounds.y1 - player.radius - 30, player.y));
+
+            // Move the camera to follow player
+            camera.x = Math.min(Math.max(player.x - canvas.width / 2, cameraBounds.x0), cameraBounds.x1)
+            camera.y = Math.min(Math.max(player.y - canvas.height / 2, cameraBounds.y0), cameraBounds.y1)
+            
+            // Update camera shake
+            camera.shakeVelX += -0.80 * camera.shakeX - 0.15 * camera.shakeVelX
+            camera.shakeVelY += -0.65 * camera.shakeY - 0.2 * camera.shakeVelY
+            camera.shakeX += camera.shakeVelX
+            camera.shakeY += camera.shakeVelY
+
+            gameTime += 1/60 // assuming 60hz update rate
+
+            // Check for nearby objects
+            player.nearObject = null;
+            roomObjects.forEach(obj => {
+                if (obj.interactive) {
+                    const dist = Math.sqrt(
+                        Math.pow(player.x - (obj.x + obj.width/2), 2) +
+                        Math.pow(player.y - (obj.y + obj.height/2), 2)
+                    );
+
+                    if (dist < 60) {
+                        player.nearObject = obj;
+                        console.log("hello")
+                        // Position interaction hint near the object
+                        interactionHint.style.left = `${obj.x - camera.x}px`;
+                        interactionHint.style.top = `${obj.y - camera.y - 160}px`;
+                        interactionHint.style.opacity = '1';
+                    }
+                }
+            });
+
+            // Hide interaction hint if not near any object
+            if (!player.nearObject) {
+                interactionHint.style.opacity = '0';
+            }
+
+            // Update timer
+            updateTimer();
+        }
+
+        // Update timer display
+        function updateTimer() {
+            const minutes = Math.floor(gameState.timer / 60);
+            const seconds = gameState.timer % 60;
+            document.getElementById('timer').textContent =
+                `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        }
+
+        // Interact with objects
+        function interactWithObject(obj) {
+            switch (obj.type) {
+                case 'pod':
+                    if (!gameState.hasWrench) {
+                        puzzleModal.style.display = 'block';
+                    }
+                    break;
+
+                case 'door':
+                    if (obj.locked) {
+                        if (gameState.hasKey) {
+                            obj.locked = false;
+                            gameState.doorUnlocked = true;
+                            updateTerminal("> You used the Access Key to unlock the door!");
+                            saveGameState();
+                        } else {
+                            updateTerminal("> The door is locked. You need an Access Key.");
+                        }
+                    } else {
+                        updateTerminal("> The door is unlocked. You can proceed to the next room.");
+                        // Transition to next room
+                        gameState.currentRoom = 'room2';
+                        saveGameState();
+                        window.location.href = '/room2';
+                    }
+                    break;
+
+                case 'console':
+                    updateTerminal("> The console displays: 'SYSTEM OFFLINE - MAINTENANCE REQUIRED'");
+                    break;
+            }
+        }
+
+        // Update terminal text
+        function updateTerminal(text) {
+            const terminal = document.getElementById('terminal-content');
+            terminal.innerHTML += `<br>${text}`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // Update inventory display
+        function updateInventory() {
+            const inventoryElement = document.getElementById('inventory-items');
+
+            if (gameState.inventory.length === 0) {
+                inventoryElement.innerHTML = 'Empty';
+            } else {
+                inventoryElement.innerHTML = '';
+                gameState.inventory.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'inventory-item';
+                    itemElement.textContent = item;
+                    inventoryElement.appendChild(itemElement);
+                });
+            }
+        }
+
+        // Game loop
+        function gameLoop() {
+            update();
+            drawRoom();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Timer countdown
+        function startTimer() {
+            setInterval(() => {
+                if (gameState.timer > 0) {
+                    gameState.timer--;
+                    updateTimer();
+                    saveGameState();
+                }
+            }, 1000);
+        }
+
+        // Initialize game
+        // loadGameState();
+        updateInventory();
+        startTimer();
+        gameLoop();
+    </script>
+</body>
+</html>
