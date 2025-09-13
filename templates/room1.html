@@ -26,9 +26,9 @@
 
         .game-container {
             position: relative;
-            width: 1200px;
+            width: 750px;
             height: 750px;
-            margin-bottom: 20px;
+            margin: 0 auto;
             border: 4px solid #4afcff;
             border-radius: 10px;
             overflow: hidden;
@@ -36,15 +36,19 @@
         }
 
         #roomCanvas {
-            background-color: #000011;
+            background-color: transparent;
             width: 100%;
             height: 100%;
+            position: absolute;
+            top: 0;
+            z-index: 2;
         }
 
         .ui-container {
             display: flex;
-            width: 1200px;
+            width: 750px;
             gap: 20px;
+            margin-top: 20px;
         }
 
         .status-panel {
@@ -61,7 +65,7 @@
             border-radius: 8px;
             padding: 15px;
             flex: 1;
-            height: 250px;
+            height: 150px;
             overflow-y: auto;
         }
 
@@ -103,6 +107,7 @@
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.3s;
+            z-index: 3;
         }
 
         .puzzle-modal {
@@ -292,7 +297,11 @@
 </head>
 <body>
     <div class="game-container">
-        <canvas id="roomCanvas" width="1200" height="750"></canvas>
+        <!-- Background image positioned behind everything -->
+        <img id="bgImage" src="/static/Storage_Room.png" style="position: absolute; top: 0; z-index: 1;">
+        
+        <!-- Canvas for drawing objects and player -->
+        <canvas id="roomCanvas" width="750" height="750"></canvas>
 
         <div id="interactionHint" class="interaction-hint">
             Press SPACE to interact
@@ -380,9 +389,13 @@
         const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
 
-        // Load background image
-        const backgroundImage = new Image();
-        backgroundImage.src = '/static/Storage_Room.png';
+        // Background image element
+        const bgImage = document.getElementById('bgImage');
+        let bgLoaded = false;
+        let bgScaledWidth = 0;
+        let bgScaledHeight = 0;
+        let bgX = 0;
+        let bgY = 0;
 
         // Flashing lights
         let flashingLights = [];
@@ -395,11 +408,11 @@
             });
         }
 
-        // Room layout and objects
+        // Room layout and objects - positions adjusted to fit within the background image
         const roomObjects = [
             {
                 type: 'floor_tile',
-                x: 350,
+                x: 250,
                 y: 250,
                 width: 40,
                 height: 40,
@@ -409,7 +422,7 @@
             },
             {
                 type: 'door',
-                x: 700,
+                x: 600,
                 y: 200,
                 width: 80,
                 height: 160,
@@ -418,7 +431,7 @@
             },
             {
                 type: 'equipment',
-                x: 200,
+                x: 150,
                 y: 150,
                 width: 60,
                 height: 60,
@@ -426,7 +439,7 @@
             },
             {
                 type: 'equipment',
-                x: 500,
+                x: 400,
                 y: 350,
                 width: 80,
                 height: 40,
@@ -442,7 +455,7 @@
             },
             {
                 type: 'flashlight',
-                x: 400,
+                x: 300,
                 y: 350,
                 width: 20,
                 height: 20,
@@ -545,54 +558,48 @@
 
         // Draw the room
         function drawRoom() {
-        // Draw background (space station floor)
-        if (backgroundImage.complete) {
-            // Tile the background image to fill the canvas
-            for (let x = 0; x < canvas.width; x += backgroundImage.width) {
-                for (let y = 0; y < canvas.height; y += backgroundImage.height) {
-                    ctx.drawImage(backgroundImage, x, y);
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Set background image position and size
+            if (!bgLoaded) {
+                if (bgImage.complete) {
+                    // Calculate scale to make image height equal to canvas height, keep aspect ratio
+                    const scale = canvas.height / bgImage.naturalHeight;
+                    bgScaledWidth = bgImage.naturalWidth * scale;
+                    bgScaledHeight = canvas.height;
+                    // Calculate x to center the image horizontally
+                    bgX = (canvas.width - bgScaledWidth) / 2;
+                    bgY = 0;
+                    // Position the background image
+                    bgImage.style.left = bgX + 'px';
+                    bgImage.style.top = bgY + 'px';
+                    bgImage.style.width = bgScaledWidth + 'px';
+                    bgImage.style.height = bgScaledHeight + 'px';
+                    bgLoaded = true;
+
+                    // Adjust player starting position to be within the background image
+                    player.x = bgX + bgScaledWidth / 2;
+                    player.y = bgY + bgScaledHeight - 100;
+                } else {
+                    bgImage.onload = () => {
+                        const scale = canvas.height / bgImage.naturalHeight;
+                        bgScaledWidth = bgImage.naturalWidth * scale;
+                        bgScaledHeight = canvas.height;
+                        bgX = (canvas.width - bgScaledWidth) / 2;
+                        bgY = 0;
+                        bgImage.style.left = bgX + 'px';
+                        bgImage.style.top = bgY + 'px';
+                        bgImage.style.width = bgScaledWidth + 'px';
+                        bgImage.style.height = bgScaledHeight + 'px';
+                        bgLoaded = true;
+
+                        // Adjust player starting position to be within the background image
+                        player.x = bgX + bgScaledWidth / 2;
+                        player.y = bgY + bgScaledHeight - 100;
+                    };
                 }
             }
-        } else {
-            ctx.fillStyle = '#000022';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // Draw floor tiles (pixel art)
-        for (let x = 0; x < canvas.width; x += 40) {
-            for (let y = 0; y < canvas.height; y += 40) {
-                // Alternate tile colors for pattern
-                const isAlt = ((x / 40) + (y / 40)) % 2 === 0;
-                ctx.fillStyle = isAlt ? '#080811' : '#050511';
-                ctx.fillRect(x, y, 40, 40);
-                // Add pixel art details
-                ctx.fillStyle = '#111122';
-                ctx.fillRect(x + 2, y + 2, 36, 36);
-                ctx.fillStyle = '#0a0a22';
-                ctx.fillRect(x + 5, y + 5, 30, 30);
-            }
-        }
-
-            // Draw fog gradient for distance darker effect
-            const gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 2);
-            gradient.addColorStop(0, 'rgba(0,0,0,0)');
-            gradient.addColorStop(1, 'rgba(0,0,0,0.3)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw walls
-            ctx.fillStyle = '#404040';
-            ctx.fillRect(0, 0, canvas.width, 30);
-            ctx.fillRect(0, 0, 30, canvas.height);
-            ctx.fillRect(canvas.width - 30, 0, 30, canvas.height);
-            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
-
-            // Draw subtle "T" on the top wall
-            ctx.fillStyle = '#ccc'; // softer than pure white
-            // Vertical stem (thin, short)
-            ctx.fillRect(397, 10, 6, 12);
-            // Horizontal bar (slim)
-            ctx.fillRect(392, 8, 16, 4);
 
             // Draw objects
             roomObjects.forEach(obj => {
@@ -600,26 +607,23 @@
                     case 'floor_tile':
                         if (obj.isLoose) {
                             // Draw as normal tile
-                            const tileX = Math.floor(obj.x / 40) * 40;
-                            const tileY = Math.floor(obj.y / 40) * 40;
-                            const isAlt = ((tileX / 40) + (tileY / 40)) % 2 === 0;
-                            ctx.fillStyle = isAlt ? '#111122' : '#0a0a22';
-                            ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                            ctx.fillStyle = '#111122';
+                            ctx.fillRect(obj.x + bgX, obj.y, obj.width, obj.height);
                             // Add pixel art details
                             ctx.fillStyle = '#222233';
-                            ctx.fillRect(obj.x + 2, obj.y + 2, 36, 36);
+                            ctx.fillRect(obj.x + bgX + 2, obj.y + 2, 36, 36);
                             ctx.fillStyle = '#1a1a33';
-                            ctx.fillRect(obj.x + 5, obj.y + 5, 30, 30);
+                            ctx.fillRect(obj.x + bgX + 5, obj.y + 5, 30, 30);
 
                             if (!gameState.tileLifted) {
                                 // Make half black to indicate loose
                                 ctx.fillStyle = '#000000';
-                                ctx.fillRect(obj.x, obj.y, obj.width / 2, obj.height);
+                                ctx.fillRect(obj.x + bgX, obj.y, obj.width / 2, obj.height);
                             } else if (obj.item && !gameState.hasKey) {
                                 // Draw key if not yet taken
                                 ctx.fillStyle = '#fffc00';
                                 ctx.beginPath();
-                                ctx.arc(obj.x + obj.width/2, obj.y + obj.height/2, 8, 0, Math.PI * 2);
+                                ctx.arc(obj.x + bgX + obj.width/2, obj.y + obj.height/2, 8, 0, Math.PI * 2);
                                 ctx.fill();
                             }
                         }
@@ -627,47 +631,47 @@
 
                     case 'door':
                         ctx.fillStyle = gameState.doorUnlocked ? '#4a5d2a' : '#2a201b';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                        ctx.fillRect(obj.x + bgX, obj.y, obj.width, obj.height);
 
                         // Draw door details
                         ctx.fillStyle = '#000';
-                        ctx.fillRect(obj.x + 10, obj.y + 20, 5, 120); // Door frame
-                        ctx.fillRect(obj.x + obj.width - 15, obj.y + 20, 5, 120); // Door frame
+                        ctx.fillRect(obj.x + bgX + 10, obj.y + 20, 5, 120); // Door frame
+                        ctx.fillRect(obj.x + bgX + obj.width - 15, obj.y + 20, 5, 120); // Door frame
 
                         // Draw door handle
                         ctx.fillStyle = '#fffc00';
                         ctx.beginPath();
-                        ctx.arc(obj.x + 60, obj.y + obj.height/2, 8, 0, Math.PI * 2);
+                        ctx.arc(obj.x + bgX + 60, obj.y + obj.height/2, 8, 0, Math.PI * 2);
                         ctx.fill();
                         break;
 
                     case 'equipment':
                         ctx.fillStyle = '#333344';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                        ctx.fillRect(obj.x + bgX, obj.y, obj.width, obj.height);
 
                         // Add equipment details
                         ctx.fillStyle = '#4afcff';
-                        ctx.fillRect(obj.x + 10, obj.y + 10, 10, 10);
-                        ctx.fillRect(obj.x + obj.width - 20, obj.y + 10, 10, 10);
+                        ctx.fillRect(obj.x + bgX + 10, obj.y + 10, 10, 10);
+                        ctx.fillRect(obj.x + bgX + obj.width - 20, obj.y + 10, 10, 10);
                         break;
 
                     case 'console':
                         ctx.fillStyle = '#111122';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                        ctx.fillRect(obj.x + bgX, obj.y, obj.width, obj.height);
 
                         // Console screen
                         ctx.fillStyle = '#4afcff';
-                        ctx.fillRect(obj.x + 10, obj.y + 10, obj.width - 20, 20);
+                        ctx.fillRect(obj.x + bgX + 10, obj.y + 10, obj.width - 20, 20);
 
                         // Console buttons
                         ctx.shadowColor = '#ff2c7d';
                         ctx.shadowBlur = 10;
                         ctx.fillStyle = '#ff2c7d';
                         ctx.beginPath();
-                        ctx.arc(obj.x + 30, obj.y + 40, 5, 0, Math.PI * 2);
+                        ctx.arc(obj.x + bgX + 30, obj.y + 40, 5, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.beginPath();
-                        ctx.arc(obj.x + 60, obj.y + 40, 5, 0, Math.PI * 2);
+                        ctx.arc(obj.x + bgX + 60, obj.y + 40, 5, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.shadowBlur = 0;
                         break;
@@ -677,15 +681,15 @@
                         if (!gameState.inventory.includes('Flashlight')) {
                             // Draw flashlight body (cylinder-like)
                             ctx.fillStyle = '#333333';
-                            ctx.fillRect(obj.x + 2, obj.y, obj.width - 4, obj.height);
+                            ctx.fillRect(obj.x + bgX + 2, obj.y, obj.width - 4, obj.height);
                             // Draw lens
                             ctx.fillStyle = '#ffff00';
                             ctx.beginPath();
-                            ctx.arc(obj.x + obj.width / 2, obj.y + obj.height / 2, 8, 0, Math.PI * 2);
+                            ctx.arc(obj.x + bgX + obj.width / 2, obj.y + obj.height / 2, 8, 0, Math.PI * 2);
                             ctx.fill();
                             // Draw switch
                             ctx.fillStyle = '#666666';
-                            ctx.fillRect(obj.x + obj.width - 5, obj.y + 5, 3, 10);
+                            ctx.fillRect(obj.x + bgX + obj.width - 5, obj.y + 5, 3, 10);
                         }
                         break;
                 }
@@ -712,33 +716,33 @@
                 ctx.fill();
             });
 
-        // Draw flashlight light
-        if (gameState.inventory.includes('Flashlight')) {
-            ctx.globalCompositeOperation = 'lighter';
-            let lightX = player.x, lightY = player.y;
-            if (player.direction === 'up') lightY -= 100;
-            else if (player.direction === 'down') lightY += 100;
-            else if (player.direction === 'left') lightX -= 100;
-            else if (player.direction === 'right') lightX += 100;
-            ctx.fillStyle = 'rgba(255,255,200,0.4)'; // slightly yellow
-            ctx.beginPath();
-            ctx.arc(lightX, lightY, 80, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalCompositeOperation = 'source-over';
-
-            // Always redraw player to prevent lightening artifacts
-            if (playerImage.complete) {
-                ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
-            } else {
-                // Fallback to circle if image not loaded
-                ctx.fillStyle = player.color;
+            // Draw flashlight light
+            if (gameState.inventory.includes('Flashlight')) {
+                ctx.globalCompositeOperation = 'lighter';
+                let lightX = player.x, lightY = player.y;
+                if (player.direction === 'up') lightY -= 100;
+                else if (player.direction === 'down') lightY += 100;
+                else if (player.direction === 'left') lightX -= 100;
+                else if (player.direction === 'right') lightX += 100;
+                ctx.fillStyle = 'rgba(255,255,200,0.4)'; // slightly yellow
                 ctx.beginPath();
-                ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                ctx.arc(lightX, lightY, 80, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
+                ctx.globalCompositeOperation = 'source-over';
+
+                // Always redraw player to prevent lightening artifacts
+                if (playerImage.complete) {
+                    ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
+                } else {
+                    // Fallback to circle if image not loaded
+                    ctx.fillStyle = player.color;
+                    ctx.beginPath();
+                    ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
+                }
             }
-        }
         }
 
         // Update game state
@@ -750,16 +754,22 @@
             if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; player.direction = 'left'; moved = true; }
             if (keys['d'] || keys['arrowright']) { player.x += player.speed; player.direction = 'right'; moved = true; }
 
-            // Constrain player to room
-            player.x = Math.max(player.radius + 30, Math.min(canvas.width - player.radius - 30, player.x));
-            player.y = Math.max(player.radius + 30, Math.min(canvas.height - player.radius - 30, player.y));
+            // Constrain player to background image area
+            if (bgLoaded) {
+                player.x = Math.max(bgX + player.radius, Math.min(bgX + bgScaledWidth - player.radius, player.x));
+                player.y = Math.max(bgY + player.radius, Math.min(bgY + bgScaledHeight - player.radius, player.y));
+            } else {
+                // Fallback constraints if background not loaded yet
+                player.x = Math.max(player.radius + 30, Math.min(canvas.width - player.radius - 30, player.x));
+                player.y = Math.max(player.radius + 30, Math.min(canvas.height - player.radius - 30, player.y));
+            }
 
             // Check for nearby objects
             player.nearObject = null;
             roomObjects.forEach(obj => {
                 if (obj.interactive) {
                     const dist = Math.sqrt(
-                        Math.pow(player.x - (obj.x + obj.width/2), 2) +
+                        Math.pow(player.x - (obj.x + bgX + obj.width/2), 2) +
                         Math.pow(player.y - (obj.y + obj.height/2), 2)
                     );
 
@@ -767,7 +777,7 @@
                         player.nearObject = obj;
 
                         // Position interaction hint near the object
-                        interactionHint.style.left = `${obj.x}px`;
+                        interactionHint.style.left = `${obj.x + bgX}px`;
                         interactionHint.style.top = `${obj.y - 40}px`;
                         interactionHint.style.opacity = '1';
                     }

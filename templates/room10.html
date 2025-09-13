@@ -36,7 +36,7 @@
         }
 
         #roomCanvas {
-            background-color: #000011;
+            background-color: transparent;
             width: 100%;
             height: 100%;
         }
@@ -323,7 +323,9 @@
 </head>
 <body>
     <div class="game-container">
-        <canvas id="roomCanvas" width="1200" height="750"></canvas>
+        <!-- Added cockpit background image -->
+        <img id="bgImage" src="/static/cockpit.gif" style="position: absolute; top: 0; z-index: 1;">
+        <canvas id="roomCanvas" width="1200" height="750" style="position: absolute; top: 0; z-index: 2;"></canvas>
 
         <div id="interactionHint" class="interaction-hint">
             Press SPACE to interact
@@ -388,10 +390,6 @@
 
         <div class="terminal">
             <div id="terminal-content">
-                > You are in the Control Center of Space Station Omega.<br>
-                > This room has the main console for controlling the escape pods.<br>
-                > You notice a card on one console and the main control panel seems to be missing a code.<br>
-                > Use WASD to move around and SPACE to interact with objects.
             </div>
         </div>
     </div>
@@ -425,6 +423,12 @@
         const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
 
+        // Background image element
+        const bgImage = document.getElementById('bgImage');
+        let bgLoaded = false;
+        let bgScaledWidth = 200; // default
+        let bgScaledHeight = 600; // default
+
         // Flashing lights
         let flashingLights = [];
         for (let i = 0; i < 10; i++) {
@@ -436,55 +440,39 @@
             });
         }
 
-        // Room layout and objects for Control Center
+        // Room layout and objects for Control Center - Adjusted positions to fit cockpit
         const roomObjects = [
             {
                 type: 'card',
-                x: 300,
-                y: 250,
+                x: 400,  // Adjusted position
+                y: 400,  // Adjusted position
                 width: 40,
                 height: 60,
                 interactive: true
             },
             {
                 type: 'console',
-                x: 600,
-                y: 300,
+                x: 500,  // Adjusted position
+                y: 500,  // Adjusted position
                 width: 200,
                 height: 100,
                 interactive: true
             },
             {
                 type: 'door',
-                x: 1000,
-                y: 300,
+                x: 700,  // Adjusted position
+                y: 400,  // Adjusted position
                 width: 80,
                 height: 160,
                 interactive: true,
                 locked: true
-            },
-            {
-                type: 'equipment',
-                x: 200,
-                y: 500,
-                width: 80,
-                height: 60,
-                interactive: false
-            },
-            {
-                type: 'equipment',
-                x: 800,
-                y: 150,
-                width: 100,
-                height: 80,
-                interactive: false
             }
         ];
 
         // Player properties
         const player = {
             x: canvas.width / 2,
-            y: canvas.height / 2,
+            y: 750 - 15 - 10, // near bottom of canvas minus radius and 10px margin
             radius: 15,
             color: '#4afcff',
             speed: 3,
@@ -593,64 +581,48 @@
 
         // Draw the room
         function drawRoom() {
-            // Draw background (control room)
-            ctx.fillStyle = '#000022';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw control room floor
-            for (let x = 0; x < canvas.width; x += 40) {
-                for (let y = 0; y < canvas.height; y += 40) {
-                    const isAlt = ((x / 40) + (y / 40)) % 2 === 0;
-                    ctx.fillStyle = isAlt ? '#0a0a33' : '#050533';
-                    ctx.fillRect(x, y, 40, 40);
-                    ctx.fillStyle = '#111133';
-                    ctx.fillRect(x + 2, y + 2, 36, 36);
-                    ctx.fillStyle = '#0a0a33';
-                    ctx.fillRect(x + 5, y + 5, 30, 30);
+            // Set background img position and size
+            if (!bgLoaded) {
+                if (bgImage.complete) {
+                    // Get actual rendered canvas dimensions
+                    const rect = canvas.getBoundingClientRect();
+                    const renderedWidth = rect.width;
+                    const renderedHeight = rect.height;
+                    // Calculate scale to make image height equal to rendered canvas height, keep aspect ratio
+                    const scale = renderedHeight / bgImage.naturalHeight;
+                    bgScaledWidth = bgImage.naturalWidth * scale;
+                    bgScaledHeight = renderedHeight;
+                    // Calculate x to center the image horizontally
+                    const x = (renderedWidth - bgScaledWidth) / 2;
+                    bgImage.style.left = x + 'px';
+                    bgImage.style.width = bgScaledWidth + 'px';
+                    bgImage.style.height = bgScaledHeight + 'px';
+                    // Position player at bottom of background image
+                    player.y = bgScaledHeight - 200;
+                    bgLoaded = true;
+                } else {
+                    bgImage.onload = () => {
+                        const rect = canvas.getBoundingClientRect();
+                        const renderedWidth = rect.width;
+                        const renderedHeight = rect.height;
+                        const scale = renderedHeight / bgImage.naturalHeight;
+                        bgScaledWidth = bgImage.naturalWidth * scale;
+                        bgScaledHeight = renderedHeight;
+                        const x = (renderedWidth - bgScaledWidth) / 2;
+                        bgImage.style.left = x + 'px';
+                        bgImage.style.width = bgScaledWidth + 'px';
+                        bgImage.style.height = bgScaledHeight + 'px';
+                        bgLoaded = true;
+                    };
                 }
             }
 
-            // Draw fog gradient for distance darker effect
-            const gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 2);
-            gradient.addColorStop(0, 'rgba(0,0,0,0)');
-            gradient.addColorStop(1, 'rgba(0,0,0,0.3)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw walls
-            ctx.fillStyle = '#404040';
-            ctx.fillRect(0, 0, canvas.width, 30);
-            ctx.fillRect(0, 0, 30, canvas.height);
-            ctx.fillRect(canvas.width - 30, 0, 30, canvas.height);
-            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
-
-            // Draw "CC" on the top wall for Control Center
-            ctx.fillStyle = '#4afcff';
-            // First C
-            ctx.fillRect(395, 10, 12, 4);
-            ctx.fillRect(390, 14, 4, 12);
-            ctx.fillRect(395, 26, 12, 4);
-            // Second C
-            ctx.fillRect(415, 10, 12, 4);
-            ctx.fillRect(410, 14, 4, 12);
-            ctx.fillRect(415, 26, 12, 4);
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Draw objects
             roomObjects.forEach(obj => {
                 switch (obj.type) {
-                    case 'card':
-                        // Draw card on table
-                        ctx.fillStyle = '#1a1a3a';
-                        ctx.fillRect(obj.x - 10, obj.y - 5, obj.width + 20, obj.height + 10);
-                        
-                        ctx.fillStyle = '#fffc00';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                        
-                        // Draw card symbol
-                        ctx.fillStyle = '#000';
-                        ctx.fillText("C", obj.x + obj.width/2 - 3, obj.y + obj.height/2 + 3);
-                        break;
-
                     case 'console':
                         // Draw main console
                         ctx.fillStyle = '#333344';
@@ -672,9 +644,10 @@
                         ctx.fillStyle = '#ff0000';
                         ctx.fillRect(obj.x + 40, obj.y + 50, 120, 15);
                         ctx.fillStyle = '#fff';
+                        ctx.font = '12px Arial';
                         ctx.fillText("CODE REQUIRED", obj.x + 50, obj.y + 61);
                         break;
-
+                        
                     case 'door':
                         ctx.fillStyle = gameState.codeEntered ? '#4a5d2a' : '#2a201b';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
@@ -686,17 +659,8 @@
 
                         // Draw door label
                         ctx.fillStyle = '#fff';
+                        ctx.font = '14px Arial';
                         ctx.fillText("ESCAPE POD", obj.x + 15, obj.y + 100);
-                        break;
-
-                    case 'equipment':
-                        ctx.fillStyle = '#333344';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-
-                        // Add equipment details
-                        ctx.fillStyle = '#4afcff';
-                        ctx.fillRect(obj.x + 10, obj.y + 10, 10, 10);
-                        ctx.fillRect(obj.x + obj.width - 20, obj.y + 10, 10, 10);
                         break;
                 }
             });
@@ -711,7 +675,7 @@
                 ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(player.x - 8, player.y - 5, 16, 10);
+                ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
             }
 
             // Draw flashing lights
@@ -732,9 +696,18 @@
             if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; player.direction = 'left'; moved = true; }
             if (keys['d'] || keys['arrowright']) { player.x += player.speed; player.direction = 'right'; moved = true; }
 
-            // Constrain player to room
-            player.x = Math.max(player.radius + 30, Math.min(canvas.width - player.radius - 30, player.x));
-            player.y = Math.max(player.radius + 30, Math.min(canvas.height - player.radius - 30, player.y));
+            // Constrain player to the bounding box of cockpit.gif image centered horizontally
+            const bgX = (canvas.width - bgScaledWidth) / 2;
+            const bgY = 0;
+
+            const bottomLimit = bgY + bgScaledHeight - player.radius + 270; // allow going far down
+            const topLimit = bottomLimit - 200; // only allow 200px of vertical range
+
+            player.x = Math.max(
+                player.radius + bgX + 90,                             
+                Math.min(bgX + bgScaledWidth - player.radius - 70, player.x) // right bound -20
+            );
+            player.y = Math.max(topLimit, Math.min(bottomLimit, player.y));
 
             // Check for nearby objects
             player.nearObject = null;
