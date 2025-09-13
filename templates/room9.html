@@ -775,13 +775,21 @@
             // Constrain player to the bounding box of kosteskab.gif image centered horizontally
             // Adjusted to scaled background image dimensions
             const bgX = (canvas.width - bgScaledWidth) / 2;
-            const bgY = 0; // top aligned
+            const bgY = 300; // top aligned
 
             player.x = Math.max(player.radius + bgX, Math.min(bgX + bgScaledWidth - player.radius, player.x));
-            // Limit vertical movement: player can move up 20px from bottom of bg image, down to bottom
             const bottomLimit = bgY + bgScaledHeight - player.radius;
-            const topLimit = bottomLimit - 140;
+            const topLimit = bottomLimit - 80;
             player.y = Math.max(topLimit, Math.min(bottomLimit, player.y));
+
+            const leftLimit = bgX + player.radius;
+            const rightLimit = bgX + bgScaledWidth - player.radius;
+
+            // Example: shrink horizontal band by 100px on each side
+            const restrictedLeft = leftLimit + 150;
+            const restrictedRight = rightLimit - 150;
+
+            player.x = Math.max(restrictedLeft, Math.min(restrictedRight, player.x));
 
             // Check for nearby objects
             player.nearObject = null;
