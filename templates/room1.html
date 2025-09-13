@@ -479,6 +479,14 @@
         const playerImage = new Image();
         playerImage.src = '/static/chr.png';
 
+        // Load door image
+        const doorImage = new Image();
+        doorImage.src = '/static/door.png';
+
+        // Load floor tile image
+        const floorTileImage = new Image();
+        floorTileImage.src = '/static/floor_tile.png';
+
         // Input handling
         const keys = {};
 
@@ -601,49 +609,43 @@
                 }
             }
 
-            // Draw objects
-            roomObjects.forEach(obj => {
-                switch (obj.type) {
-                    case 'floor_tile':
-                        if (obj.isLoose) {
-                            // Draw as normal tile
-                            ctx.fillStyle = '#111122';
-                            ctx.fillRect(obj.x + bgX, obj.y, obj.width, obj.height);
-                            // Add pixel art details
-                            ctx.fillStyle = '#222233';
-                            ctx.fillRect(obj.x + bgX + 2, obj.y + 2, 36, 36);
-                            ctx.fillStyle = '#1a1a33';
-                            ctx.fillRect(obj.x + bgX + 5, obj.y + 5, 30, 30);
-
-                            if (!gameState.tileLifted) {
-                                // Make half black to indicate loose
-                                ctx.fillStyle = '#000000';
-                                ctx.fillRect(obj.x + bgX, obj.y, obj.width / 2, obj.height);
-                            } else if (obj.item && !gameState.hasKey) {
-                                // Draw key if not yet taken
-                                ctx.fillStyle = '#fffc00';
-                                ctx.beginPath();
-                                ctx.arc(obj.x + bgX + obj.width/2, obj.y + obj.height/2, 8, 0, Math.PI * 2);
-                                ctx.fill();
-                            }
+        // Draw objects
+        roomObjects.forEach(obj => {
+            switch (obj.type) {
+                case 'floor_tile':
+                    if (obj.isLoose) {
+                        // Draw floor tile image instead of pixel art
+                        if (floorTileImage.complete) {
+                            ctx.drawImage(floorTileImage, obj.x + bgX, obj.y, obj.width, obj.height);
+                        } else {
+                            floorTileImage.onload = () => {
+                                ctx.drawImage(floorTileImage, obj.x + bgX, obj.y, obj.width, obj.height);
+                            };
                         }
-                        break;
 
-                    case 'door':
-                        ctx.fillStyle = gameState.doorUnlocked ? '#4a5d2a' : '#2a201b';
-                        ctx.fillRect(obj.x + bgX, obj.y, obj.width, obj.height);
+                        if (!gameState.tileLifted) {
+                            // Make half black to indicate loose
+                            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                            ctx.fillRect(obj.x + bgX, obj.y, obj.width / 2, obj.height);
+                        } else if (obj.item && !gameState.hasKey) {
+                            // Draw key if not yet taken
+                            ctx.fillStyle = '#fffc00';
+                            ctx.beginPath();
+                            ctx.arc(obj.x + bgX + obj.width/2, obj.y + obj.height/2, 8, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                    break;
 
-                        // Draw door details
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(obj.x + bgX + 10, obj.y + 20, 5, 120); // Door frame
-                        ctx.fillRect(obj.x + bgX + obj.width - 15, obj.y + 20, 5, 120); // Door frame
-
-                        // Draw door handle
-                        ctx.fillStyle = '#fffc00';
-                        ctx.beginPath();
-                        ctx.arc(obj.x + bgX + 60, obj.y + obj.height/2, 8, 0, Math.PI * 2);
-                        ctx.fill();
-                        break;
+                case 'door':
+                    if (doorImage.complete) {
+                        ctx.drawImage(doorImage, obj.x + bgX, obj.y, obj.width, obj.height);
+                    } else {
+                        doorImage.onload = () => {
+                            ctx.drawImage(doorImage, obj.x + bgX, obj.y, obj.width, obj.height);
+                        };
+                    }
+                    break;
 
                     case 'equipment':
                         ctx.fillStyle = '#333344';

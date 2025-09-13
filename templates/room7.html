@@ -110,7 +110,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: #1a1a3a;
+            background-image: url('/static/pipe_system_bg.png');
+            background-size: cover;
+            background-repeat: no-repeat;
             border: 3px solid #4afcff;
             border-radius: 10px;
             padding: 20px;
@@ -300,7 +302,9 @@
         .pipe {
             width: 80px;
             height: 80px;
-            background-color: #555;
+            background-image: url('/static/pipe_straight.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
             border: 2px solid #4afcff;
             border-radius: 5px;
             cursor: pointer;
@@ -308,43 +312,12 @@
             transition: transform 0.3s;
         }
 
-        .pipe:hover {
-            background-color: #666;
+        .pipe.vertical {
+            transform: rotate(90deg);
         }
 
-        .pipe::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 20%;
-            background-color: #4afcff;
-            top: 40%;
-            left: 0;
-        }
-
-        .pipe.vertical::before {
-            width: 20%;
-            height: 100%;
-            top: 0;
-            left: 40%;
-        }
-
-        .pipe.corner::before {
-            width: 50%;
-            height: 20%;
-            background-color: #4afcff;
-            top: 40%;
-            left: 0;
-        }
-
-        .pipe.corner::after {
-            content: '';
-            position: absolute;
-            width: 20%;
-            height: 50%;
-            background-color: #4afcff;
-            top: 40%;
-            left: 40%;
+        .pipe.corner {
+            background-image: url('/static/pipe_angled.png');
         }
         
         /* Wire Puzzle Styles */
@@ -448,9 +421,13 @@
 
         <!-- Pipe Puzzle Modal -->
         <div id="pipePuzzleModal" class="puzzle-modal">
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
             <button class="close-button" id="closePipePuzzle">✕</button>
-            <h2 class="puzzle-title">PIPE SYSTEM</h2>
-            <p class="puzzle-content">Align the pipes to create a continuous flow path from left to right.</p>
             <div class="pipe-container">
                 <div class="pipe vertical" data-rotation="0" onclick="rotatePipe(this)"></div>
                 <div class="pipe corner" data-rotation="0" onclick="rotatePipe(this)"></div>
