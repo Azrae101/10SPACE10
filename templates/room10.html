@@ -390,10 +390,6 @@
 
         <div class="terminal">
             <div id="terminal-content">
-                > You are in the Control Center of Space Station Omega.<br>
-                > This room has the main console for controlling the escape pods.<br>
-                > You notice a card on one console and the main control panel seems to be missing a code.<br>
-                > Use WASD to move around and SPACE to interact with objects.
             </div>
         </div>
     </div>
@@ -627,20 +623,6 @@
             // Draw objects
             roomObjects.forEach(obj => {
                 switch (obj.type) {
-                    case 'card':
-                        // Draw card on table
-                        ctx.fillStyle = '#1a1a3a';
-                        ctx.fillRect(obj.x - 10, obj.y - 5, obj.width + 20, obj.height + 10);
-                        
-                        ctx.fillStyle = '#fffc00';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                        
-                        // Draw card symbol
-                        ctx.fillStyle = '#000';
-                        ctx.font = '20px Arial';
-                        ctx.fillText("C", obj.x + obj.width/2 - 7, obj.y + obj.height/2 + 7);
-                        break;
-
                     case 'console':
                         // Draw main console
                         ctx.fillStyle = '#333344';
@@ -665,7 +647,7 @@
                         ctx.font = '12px Arial';
                         ctx.fillText("CODE REQUIRED", obj.x + 50, obj.y + 61);
                         break;
-
+                        
                     case 'door':
                         ctx.fillStyle = gameState.codeEntered ? '#4a5d2a' : '#2a201b';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
