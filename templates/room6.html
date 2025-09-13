@@ -36,7 +36,7 @@
         }
 
         #roomCanvas {
-            background-color: #000011;
+            background-color: transparent;
             width: 100%;
             height: 100%;
         }
@@ -171,15 +171,14 @@
 
         #inventory-items {
             margin-top: 10px;
-            height: 40px;
+            min-height: 40px;
             border: 1px solid #4afcff;
             border-radius: 5px;
             padding: 5px;
-            overflow-y: auto;
         }
 
         .inventory-item {
-            display: block;
+            display: inline-block;
             background-color: #4afcff;
             color: #0a0a2a;
             padding: 5px 10px;
@@ -252,6 +251,32 @@
             text-align: center;
         }
 
+        .note-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #1a1a3a;
+            border: 3px solid #4afcff;
+            border-radius: 10px;
+            padding: 20px;
+            width: 400px;
+            z-index: 100;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            display: none;
+        }
+
+        .note-text {
+            background-color: #0a0a2a;
+            border: 2px solid #4afcff;
+            border-radius: 5px;
+            color: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            min-height: 150px;
+        }
+
         .settings-button {
             position: absolute;
             top: 10px;
@@ -294,7 +319,7 @@
     <h1>SPACE STATION ESCAPE - ROOM 6</h1>
 
     <div class="game-container">
-        <canvas id="roomCanvas" width="1200" height="750"></canvas>
+        <canvas id="roomCanvas" width="1200" height="750" style="position: absolute; top: 0; z-index: -1;"></canvas>
 
         <div id="interactionHint" class="interaction-hint">
             Press SPACE to interact
@@ -303,8 +328,8 @@
         <div id="puzzleModal" class="puzzle-modal">
             <button class="close-button" id="closePuzzle">✕</button>
             <h2 class="puzzle-title">IN THE BATHROOM</h2>
-            <p class="puzzle-content">You found a wrench in the pile of spacesuits!</p>
-            <button class="puzzle-button" id="pickupWrench">Pick it up</button>
+            <p id="puzzleContent" class="puzzle-content">You close the toilet lid. You find a hidden note on the top of the lid.</p>
+            <button class="puzzle-button" id="pickupWrench">Continue</button>
         </div>
     </div>
 
@@ -341,6 +366,8 @@
             tileLifted: false,
             doorUnlocked: false,
             hasWrench: false,
+            engineFixed: false,
+            toiletLidOpen: true,
         };
 
         // Load game state from localStorage
@@ -359,13 +386,19 @@
         // Canvas setup
         const canvas = document.getElementById('roomCanvas');
         const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+
+        const bgImage = new Image();
+        bgImage.src = '/static/bathroom.png'
+        const bgOpenImage = new Image();
+        bgOpenImage.src = '/static/bathroom_open.png'
 
         // Room layout and objects
         const roomObjects = [
             {
                 type: 'toilet',
-                x: 350,
-                y: 250,
+                x: 560,
+                y: 640,
                 width: 80,
                 height: 80,
                 interactive: true,
@@ -374,11 +407,11 @@
 
         // Player properties
         const player = {
-            x: 0,
-            y: canvas.height,
+            x: canvas.width / 2,
+            y: canvas.height / 2,
             radius: 15,
             color: '#4afcff',
-            speed: 3,
+            speed: 4,
             nearObject: null
         };
 
@@ -386,7 +419,6 @@
         const camera = {
             x: 0,
             y: 0,
-            zoom: 2,
             shakeX: 0,
             shakeY: 0,
             shakeVelX: 0,
@@ -401,10 +433,10 @@
         }
 
         const roomBounds = {
-            x0: 0,
-            x1: 400,
-            y0: 180,
-            y1: 320,
+            x0: 450,
+            x1: 750,
+            y0: 550,
+            y1: 680,
         }
 
         let gameTime = 0
@@ -412,15 +444,6 @@
         // Load player image
         const playerImage = new Image();
         playerImage.src = '/static/chr.png';
-
-        const bgImage = new Image(600, 4200);
-        bgImage.src = '/static/bg_room_5.png'
-
-        // const darkImage = new Image();
-        // darkImage.src = '/static/dark.png';
-
-        const darkFlashlightImage = new Image();
-        darkFlashlightImage.src = '/static/dark_flashlight.png'
 
         // Input handling
         const keys = {};
@@ -443,6 +466,7 @@
 
         // Puzzle modal elements
         const puzzleModal = document.getElementById('puzzleModal');
+        const puzzleContent = document.getElementById('puzzleContent')
         const closePuzzleBtn = document.getElementById('closePuzzle');
         const pickupWrenchBtn = document.getElementById('pickupWrench');
 
@@ -451,64 +475,39 @@
             puzzleModal.style.display = 'none';
         });
 
-        // Lift tile button
+        // Pickup wrench button
         pickupWrenchBtn.addEventListener('click', () => {
-            if (!gameState.hasWrench) {
-                gameState.hasWrench = true;
-                gameState.inventory.push('Wrench');
-                updateInventory();
-                updateTerminal("> You dug into the pile of suits and found a wrench!");
-                puzzleModal.style.display = 'none';
-                saveGameState();
-            }
+            updateTerminal("> You dug into the pile of suits and found a wrench!");
+            puzzleModal.style.display = 'none';
         });
 
         // Draw the room
         function drawRoom() {
-            ctx.imageSmoothingEnabled = false;
             ctx.resetTransform()
             let camX = camera.x + camera.shakeX
             let camY = camera.y + camera.shakeY
+            // Ambient camera movement
+            camX += 4 * Math.cos(1.6343 * gameTime)
+            camY += 4 * Math.sin(2.6234 * gameTime)
             ctx.translate(-camX, -camY)
-            ctx.scale(camera.zoom, camera.zoom)
 
-            // Light ambient camera shake
-            ctx.translate(4 * Math.cos(1.6343 * gameTime), 4 * Math.sin(2.6234 * gameTime))
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw floor tiles (pixel art)
-            for (let x = 0; x < canvas.width; x += 40) {
-                for (let y = 0; y < canvas.height; y += 40) {
-                    // Alternate tile colors for pattern
-                    const isAlt = ((x / 40) + (y / 40)) % 2 === 0;
-                    ctx.fillStyle = isAlt ? '#080811' : '#050511';
-                    ctx.fillRect(x, y, 40, 40);
-                    // Add pixel art details
-                    ctx.fillStyle = '#111122';
-                    ctx.fillRect(x + 2, y + 2, 36, 36);
-                    ctx.fillStyle = '#0a0a22';
-                    ctx.fillRect(x + 5, y + 5, 30, 30);
+            // Draw background
+            if (bgImage.complete) {
+                if (gameState.toiletLidOpen) {
+                    ctx.drawImage(bgOpenImage, 225, 0, 750, 750)
+                } else {
+                    ctx.drawImage(bgImage, 225, 0, 750, 750)
                 }
             }
-
-            // Draw fog gradient for distance darker effect
-            const gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) / 2);
-            gradient.addColorStop(0, 'rgba(0,0,0,0)');
-            gradient.addColorStop(1, 'rgba(0,0,0,0.3)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw walls
-            ctx.fillStyle = '#404040';
-            ctx.fillRect(0, 0, canvas.width, 30);
-            ctx.fillRect(0, 0, 30, canvas.height);
-            ctx.fillRect(canvas.width - 30, 0, 30, canvas.height);
-            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
 
             // Draw objects
             roomObjects.forEach(obj => {
                 switch (obj.type) {
                     case 'toilet':
-                        ctx.fillStyle = '#888888';
+                        ctx.fillStyle = '#444466';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
                         break;
                 }
@@ -516,7 +515,7 @@
 
             // Draw player
             if (playerImage.complete) {
-                ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
+                ctx.drawImage(playerImage, player.x - 60, player.y - 120, 120, 240);
             } else {
                 // Fallback to circle if image not loaded
                 ctx.fillStyle = player.color;
@@ -526,10 +525,6 @@
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
             }
-
-            // // Draw darkness
-            // // ctx.drawImage(darkImage, player.x - 1536, player.y - 1152, 3072, 2304)
-            // ctx.drawImage(darkFlashlightImage, player.x - 1536, player.y - 1152, 3072, 2304)
         }
 
         // Update game state
@@ -556,6 +551,7 @@
 
             gameTime += 1/60 // assuming 60hz update rate
 
+
             // Check for nearby objects
             player.nearObject = null;
             roomObjects.forEach(obj => {
@@ -570,7 +566,7 @@
 
                         // Position interaction hint near the object
                         interactionHint.style.left = `${obj.x}px`;
-                        interactionHint.style.top = `${obj.y - 40}px`;
+                        interactionHint.style.top = `${obj.y - 240}px`;
                         interactionHint.style.opacity = '1';
                     }
                 }
@@ -597,7 +593,13 @@
         function interactWithObject(obj) {
             switch (obj.type) {
                 case 'toilet':
-                    updateTerminal("> You lift the toilet seat.");
+                    if (gameState.toiletLidOpen) {
+                        puzzleModal.style.display = 'block';
+                        puzzleContent.innerHTML = "You close the toilet lid. You find a hidden note on the top of the lid."
+                        pickupWrenchBtn.style.display = 'block'
+                        gameState.toiletLidOpen = false;
+                        saveGameState();
+                    }
                     break;
             }
         }
@@ -645,7 +647,7 @@
         }
 
         // Initialize game
-        loadGameState();
+        // loadGameState();
         updateInventory();
         startTimer();
         gameLoop();
