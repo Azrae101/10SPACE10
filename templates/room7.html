@@ -218,7 +218,7 @@
         .game-over-button {
             background-color: #ff2c7d;
             color: #fff;
-            border: noe;
+            border: none;
             border-radius: 5px;
             padding: 15px 30px;
             cursor: pointer;
@@ -293,10 +293,10 @@
         .pipe-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-gap: 10px;
+            grid-gap: 0px;
             margin: 20px 0;
         }
-        
+
         .pipe {
             width: 80px;
             height: 80px;
@@ -307,36 +307,44 @@
             position: relative;
             transition: transform 0.3s;
         }
-        
+
         .pipe:hover {
             background-color: #666;
         }
-        
+
         .pipe::before {
             content: '';
             position: absolute;
-            width: 60%;
+            width: 100%;
             height: 20%;
             background-color: #4afcff;
             top: 40%;
-            left: 20%;
+            left: 0;
         }
-        
+
         .pipe.vertical::before {
             width: 20%;
-            height: 60%;
-            top: 20%;
+            height: 100%;
+            top: 0;
             left: 40%;
         }
-        
+
         .pipe.corner::before {
-            width: 60%;
-            height: 60%;
-            background: 
-                linear-gradient(to bottom right, transparent 45%, #4afcff 45%, #4afcff 55%, transparent 55%),
-                linear-gradient(to bottom left, transparent 45%, #4afcff 45%, #4afcff 55%, transparent 55%);
-            top: 20%;
-            left: 20%;
+            width: 50%;
+            height: 20%;
+            background-color: #4afcff;
+            top: 40%;
+            left: 0;
+        }
+
+        .pipe.corner::after {
+            content: '';
+            position: absolute;
+            width: 20%;
+            height: 50%;
+            background-color: #4afcff;
+            top: 40%;
+            left: 40%;
         }
         
         /* Wire Puzzle Styles */
@@ -344,6 +352,7 @@
             display: flex;
             justify-content: space-between;
             margin: 20px 0;
+            position: relative;
         }
         
         .wire-column {
@@ -359,6 +368,7 @@
             background-color: #4afcff;
             cursor: pointer;
             position: relative;
+            z-index: 2;
         }
         
         .wire-node.left::after {
@@ -370,6 +380,7 @@
             top: 50%;
             left: 30px;
             transform: translateY(-50%);
+            z-index: 1;
         }
         
         .wire-node.right::before {
@@ -381,13 +392,14 @@
             top: 50%;
             right: 30px;
             transform: translateY(-50%);
+            z-index: 1;
         }
         
         .wire-connection {
             position: absolute;
             height: 3px;
             background-color: #ff2c7d;
-            z-index: 10;
+            z-index: 1;
             transform-origin: left center;
         }
         
@@ -418,6 +430,12 @@
             top: 45px;
             background-color: #7cb342;
         }
+
+        /* Wire colors */
+        .wire-red { background-color: #ff2c7d; }
+        .wire-blue { background-color: #4afcff; }
+        .wire-green { background-color: #7cb342; }
+        .wire-yellow { background-color: #ffcc00; }
     </style>
 </head>
 <body>
@@ -453,17 +471,18 @@
             <p class="puzzle-content">Connect the wires from the left panel to the right panel to restore power.</p>
             <div class="wire-puzzle">
                 <div class="wire-column">
-                    <div class="wire-node left" data-id="1" onclick="selectWire(this)"></div>
-                    <div class="wire-node left" data-id="2" onclick="selectWire(this)"></div>
-                    <div class="wire-node left" data-id="3" onclick="selectWire(this)"></div>
-                    <div class="wire-node left" data-id="4" onclick="selectWire(this)"></div>
+                    <div class="wire-node left wire-red" data-id="1" data-color="red"></div>
+                    <div class="wire-node left wire-blue" data-id="2" data-color="blue"></div>
+                    <div class="wire-node left wire-green" data-id="3" data-color="green"></div>
+                    <div class="wire-node left wire-yellow" data-id="4" data-color="yellow"></div>
                 </div>
                 <div class="wire-column">
-                    <div class="wire-node right" data-id="1" onclick="selectWire(this)"></div>
-                    <div class="wire-node right" data-id="2" onclick="selectWire(this)"></div>
-                    <div class="wire-node right" data-id="3" onclick="selectWire(this)"></div>
-                    <div class="wire-node right" data-id="4" onclick="selectWire(this)"></div>
+                    <div class="wire-node right wire-blue" data-id="1" data-color="blue"></div>
+                    <div class="wire-node right wire-green" data-id="2" data-color="green"></div>
+                    <div class="wire-node right wire-red" data-id="3" data-color="red"></div>
+                    <div class="wire-node right wire-yellow" data-id="4" data-color="yellow"></div>
                 </div>
+                <div id="wire-connections"></div>
             </div>
             <button class="puzzle-button" id="checkWires">Check Solution</button>
         </div>
@@ -532,14 +551,27 @@
             pipePuzzleSolved: false,
             wirePuzzleSolved: false,
             isPaused: false,
-            lightsOn: false
+            lightsOn: false,
+            wireConnections: []
         };
 
         // Load game state from localStorage
         function loadGameState() {
             const savedState = localStorage.getItem('spaceStationGameState');
             if (savedState) {
-                gameState = JSON.parse(savedState);
+                const parsedState = JSON.parse(savedState);
+                // Preserve the wire connections if we're in the same room
+                if (parsedState.currentRoom === 'room7') {
+                    gameState = parsedState;
+                    // Redraw wire connections if puzzle was started
+                    if (gameState.wireConnections.length > 0) {
+                        redrawWireConnections();
+                    }
+                } else {
+                    gameState.currentRoom = 'room7';
+                    gameState.timer = parsedState.timer;
+                    gameState.inventory = parsedState.inventory;
+                }
             }
         }
 
@@ -701,7 +733,7 @@
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
                         
                         // Draw pipe icon
-                        ctx.strokeStyle = '#4afcff';
+                        ctx.strokeStyle = gameState.pipePuzzleSolved ? '#7cb342' : '#4afcff';
                         ctx.lineWidth = 3;
                         ctx.beginPath();
                         ctx.moveTo(obj.x + 10, obj.y + 40);
@@ -716,7 +748,7 @@
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
                         
                         // Draw wire icon
-                        ctx.strokeStyle = '#4afcff';
+                        ctx.strokeStyle = gameState.wirePuzzleSolved ? '#7cb342' : '#4afcff';
                         ctx.lineWidth = 2;
                         ctx.beginPath();
                         ctx.moveTo(obj.x + 20, obj.y + 20);
@@ -800,19 +832,15 @@
         function interactWithObject(obj) {
             switch (obj.type) {
                 case 'safety_switch':
-                    obj.isOn = !obj.isOn;
-                    updateTerminal("> Safety switch " + (obj.isOn ? "activated" : "deactivated") + ".");
-                    
-                    // Check if all safety switches are on
-                    const allSwitchesOn = roomObjects.filter(o => o.type === 'safety_switch')
-                                                     .every(o => o.isOn);
-                    
-                    if (allSwitchesOn && !gameState.safetySwitchesOn) {
-                        gameState.safetySwitchesOn = true;
-                        gameState.lightsOn = true;
-                        updateTerminal("> All safety switches activated! Lights are now on.");
+                    // Only allow toggling if both puzzles are solved
+                    if (gameState.pipePuzzleSolved && gameState.wirePuzzleSolved) {
+                        obj.isOn = !obj.isOn;
+                        gameState.lightsOn = obj.isOn;
+                        updateTerminal("> Safety switch " + (obj.isOn ? "activated" : "deactivated") + ".");
+                        updateTerminal("> Lights " + (obj.isOn ? "on" : "off") + ".");
+                    } else {
+                        updateTerminal("> Safety switch won't activate. Complete both puzzles first.");
                     }
-                    
                     saveGameState();
                     break;
 
@@ -885,7 +913,7 @@
             const pipes = document.querySelectorAll('.pipe');
             const rotations = Array.from(pipes).map(pipe => parseInt(pipe.getAttribute('data-rotation')));
             
-            // This is a simplified check - in a real game, you'd have a more complex validation
+            // Correct rotations for the pipe puzzle
             const correctRotations = [0, 270, 0, 0, 90, 0, 180, 0];
             const isCorrect = rotations.every((rot, i) => rot === correctRotations[i]);
             
@@ -894,44 +922,138 @@
                 gameState.pipePuzzleSolved = true;
                 pipePuzzleModal.style.display = 'none';
                 saveGameState();
+                
+                // Check if both puzzles are solved
+                if (gameState.wirePuzzleSolved) {
+                    updateTerminal("> Both puzzles solved! You can now activate the safety switch.");
+                }
             } else {
                 updateTerminal("> Pipe alignment is incorrect. Please try again.");
             }
         }
 
-        // Wire puzzle functions
-        let selectedWire = null;
+        // Wire puzzle drag variables
+        let isDragging = false;
+        let dragStartNode = null;
+        let mouseX = 0;
+        let mouseY = 0;
 
-        function selectWire(wireElement) {
-            if (!selectedWire) {
-                selectedWire = wireElement;
-                wireElement.style.backgroundColor = '#ff2c7d';
-            } else {
-                // Check if both wires are from different sides
-                const isLeft = selectedWire.classList.contains('left');
-                const isRight = wireElement.classList.contains('right');
-                
-                if ((isLeft && isRight) || (!isLeft && !isRight)) {
-                    // Connect the wires visually (simplified)
-                    updateTerminal("> Wire connected.");
-                    
-                    // Reset selection
-                    selectedWire.style.backgroundColor = '#4afcff';
-                    selectedWire = null;
-                    wireElement.style.backgroundColor = '#4afcff';
-                } else {
-                    updateTerminal("> Can only connect left to right nodes.");
+        // Add drag event listeners to wire puzzle modal
+        wirePuzzleModal.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('wire-node') && e.target.classList.contains('left')) {
+                isDragging = true;
+                dragStartNode = e.target;
+                const rect = wirePuzzleModal.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
+                redrawWireConnections();
+            }
+        });
+
+        wirePuzzleModal.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const rect = wirePuzzleModal.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
+                redrawWireConnections();
+            }
+        });
+
+        wirePuzzleModal.addEventListener('mouseup', (e) => {
+            if (isDragging) {
+                isDragging = false;
+                if (e.target.classList.contains('wire-node') && e.target.classList.contains('right')) {
+                    // Connect wires
+                    const leftId = dragStartNode.getAttribute('data-id');
+                    const rightId = e.target.getAttribute('data-id');
+                    // Remove any existing connection for this left node
+                    gameState.wireConnections = gameState.wireConnections.filter(conn => conn.leftId !== leftId);
+                    // Add new connection
+                    gameState.wireConnections.push({
+                        leftId: leftId,
+                        rightId: rightId,
+                        leftColor: dragStartNode.getAttribute('data-color'),
+                        rightColor: e.target.getAttribute('data-color')
+                    });
+                    redrawWireConnections();
                 }
+                dragStartNode = null;
+                redrawWireConnections();
+            }
+        });
+
+        function redrawWireConnections() {
+            const wireContainer = document.getElementById('wire-connections');
+            wireContainer.innerHTML = '';
+
+            gameState.wireConnections.forEach(conn => {
+                const leftNode = document.querySelector(`.wire-node.left[data-id="${conn.leftId}"]`);
+                const rightNode = document.querySelector(`.wire-node.right[data-id="${conn.rightId}"]`);
+
+                if (leftNode && rightNode) {
+                    const leftRect = leftNode.getBoundingClientRect();
+                    const rightRect = rightNode.getBoundingClientRect();
+                    const containerRect = wireContainer.getBoundingClientRect();
+
+                    const leftX = leftRect.left + leftRect.width - containerRect.left;
+                    const leftY = leftRect.top + leftRect.height/2 - containerRect.top;
+                    const rightX = rightRect.left - containerRect.left;
+                    const rightY = rightRect.top + rightRect.height/2 - containerRect.top;
+
+                    const distance = Math.sqrt(Math.pow(rightX - leftX, 2) + Math.pow(rightY - leftY, 2));
+                    const angle = Math.atan2(rightY - leftY, rightX - leftX) * 180 / Math.PI;
+
+                    const wire = document.createElement('div');
+                    wire.className = 'wire-connection';
+                    wire.style.width = `${distance}px`;
+                    wire.style.left = `${leftX}px`;
+                    wire.style.top = `${leftY}px`;
+                    wire.style.transform = `rotate(${angle}deg)`;
+                    wire.style.backgroundColor = conn.leftColor === conn.rightColor ? '#7cb342' : '#ff2c7d';
+
+                    wireContainer.appendChild(wire);
+                }
+            });
+
+            // Draw temporary wire while dragging
+            if (isDragging && dragStartNode) {
+                const leftRect = dragStartNode.getBoundingClientRect();
+                const containerRect = wireContainer.getBoundingClientRect();
+                const leftX = leftRect.left + leftRect.width - containerRect.left;
+                const leftY = leftRect.top + leftRect.height/2 - containerRect.top;
+                const distance = Math.sqrt(Math.pow(mouseX - leftX, 2) + Math.pow(mouseY - leftY, 2));
+                const angle = Math.atan2(mouseY - leftY, mouseX - leftX) * 180 / Math.PI;
+
+                const wire = document.createElement('div');
+                wire.className = 'wire-connection';
+                wire.style.width = `${distance}px`;
+                wire.style.left = `${leftX}px`;
+                wire.style.top = `${leftY}px`;
+                wire.style.transform = `rotate(${angle}deg)`;
+                wire.style.backgroundColor = '#ff2c7d'; // Temporary color
+
+                wireContainer.appendChild(wire);
             }
         }
 
         function checkWireSolution() {
-            // In a real implementation, you would check the connections
-            // For this example, we'll just mark it as solved
-            updateTerminal("> Wire connections verified! Power is restored.");
-            gameState.wirePuzzleSolved = true;
-            wirePuzzleModal.style.display = 'none';
-            saveGameState();
+            // Check if all wires are connected correctly (matching colors)
+            const allCorrect = gameState.wireConnections.length === 4 && 
+                gameState.wireConnections.every(conn => conn.leftColor === conn.rightColor);
+            
+            if (allCorrect) {
+                updateTerminal("> Wire connections verified! Power is restored.");
+                gameState.wirePuzzleSolved = true;
+                wirePuzzleModal.style.display = 'none';
+                saveGameState();
+                
+                // Check if both puzzles are solved
+                if (gameState.pipePuzzleSolved) {
+                    updateTerminal("> Both puzzles solved! You can now activate the safety switch.");
+                }
+            } else {
+                updateTerminal("> Wire connections are incorrect. Colors must match.");
+            }
         }
 
         // Timer countdown
@@ -1034,7 +1156,8 @@
                 pipePuzzleSolved: false,
                 wirePuzzleSolved: false,
                 isPaused: false,
-                lightsOn: false
+                lightsOn: false,
+                wireConnections: []
             };
             // Reset room objects
             roomObjects.forEach(obj => {
