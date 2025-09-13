@@ -18,5 +18,6 @@ def room2():
 def room3():
     return render_template('room3.html')
 
+# For local testing only:
 #if __name__ == '__main__':
 #    app.run(debug=True)
