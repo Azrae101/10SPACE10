@@ -61,7 +61,7 @@
             border-radius: 8px;
             padding: 15px;
             flex: 1;
-            height: 150px;
+            height: 250px;
             overflow-y: auto;
         }
         
@@ -192,7 +192,7 @@
     <h1>SPACE STATION ESCAPE - ROOM 1</h1>
     
     <div class="game-container">
-        <canvas id="roomCanvas" width="800" height="500"></canvas>
+        <canvas id="roomCanvas" width="800" height="600"></canvas>
         
         <div id="interactionHint" class="interaction-hint">
             Press SPACE to interact
@@ -303,6 +303,10 @@
             speed: 3,
             nearObject: null
         };
+
+        // Load player image
+        const playerImage = new Image();
+        playerImage.src = '/static/chr.png';
         
         // Input handling
         const keys = {};
@@ -350,22 +354,35 @@
             // Draw background (space station floor)
             ctx.fillStyle = '#222244';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw floor grid
-            ctx.strokeStyle = '#333355';
-            ctx.lineWidth = 1;
+
+            // Draw floor tiles (pixel art)
             for (let x = 0; x < canvas.width; x += 40) {
                 for (let y = 0; y < canvas.height; y += 40) {
-                    ctx.strokeRect(x, y, 40, 40);
+                    // Alternate tile colors for pattern
+                    const isAlt = ((x / 40) + (y / 40)) % 2 === 0;
+                    ctx.fillStyle = isAlt ? '#333355' : '#2a2a44';
+                    ctx.fillRect(x, y, 40, 40);
+                    // Add pixel art details
+                    ctx.fillStyle = '#444466';
+                    ctx.fillRect(x + 2, y + 2, 36, 36);
+                    ctx.fillStyle = '#3a3a55';
+                    ctx.fillRect(x + 5, y + 5, 30, 30);
                 }
             }
-            
+
             // Draw walls
             ctx.fillStyle = '#2a4fff';
             ctx.fillRect(0, 0, canvas.width, 30);
             ctx.fillRect(0, 0, 30, canvas.height);
             ctx.fillRect(canvas.width - 30, 0, 30, canvas.height);
             ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+
+            // Draw subtle "T" on the top wall
+            ctx.fillStyle = '#ffffff';
+            // Vertical stem
+            ctx.fillRect(390, 5, 20, 20);
+            // Horizontal bar
+            ctx.fillRect(380, 5, 40, 10);
             
             // Draw objects
             roomObjects.forEach(obj => {
@@ -438,14 +455,17 @@
             });
             
             // Draw player
-            ctx.fillStyle = player.color;
-            ctx.beginPath();
-            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Draw astronaut details
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
+            if (playerImage.complete) {
+                ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
+            } else {
+                // Fallback to circle if image not loaded
+                ctx.fillStyle = player.color;
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
+            }
         }
         
         // Update game state
