@@ -229,6 +229,27 @@
         .game-over-button:hover {
             background-color: #cc1a5a;
         }
+
+        .pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 150;
+            display: none;
+        }
+
+        .pause-title {
+            color: #4afcff;
+            font-size: 4rem;
+            text-shadow: 0 0 20px rgba(74, 252, 255, 0.5);
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -253,6 +274,10 @@
             <p class="game-over-content">Time has run out! The space station's systems have failed.</p>
             <button class="game-over-button" id="restartButton">Restart Game</button>
         </div>
+
+        <div id="pauseOverlay" class="pause-overlay">
+            <h1 class="pause-title">PAUSED</h1>
+        </div>
     </div>
 
     <div class="ui-container">
@@ -268,6 +293,9 @@
             <div class="status-item">
                 <span class="status-label">INVENTORY:</span>
                 <div id="inventory-items">Empty</div>
+            </div>
+            <div class="status-item">
+                <button id="pauseButton" class="puzzle-button">Pause</button>
             </div>
         </div>
 
@@ -289,7 +317,8 @@
             inventory: [],
             hasKey: false,
             tileLifted: false,
-            doorUnlocked: false
+            doorUnlocked: false,
+            isPaused: false
         };
 
         // Load game state from localStorage
@@ -376,8 +405,8 @@
         window.addEventListener('keydown', (e) => {
             keys[e.key.toLowerCase()] = true;
 
-            // Handle interaction
-            if (e.key === ' ' && player.nearObject) {
+            // Handle interaction only if not paused
+            if (e.key === ' ' && player.nearObject && !gameState.isPaused) {
                 interactWithObject(player.nearObject);
             }
         });
@@ -421,6 +450,9 @@
             localStorage.removeItem('spaceStationGameState');
             window.location.href = '/room1';
         });
+
+        // Pause overlay element
+        const pauseOverlay = document.getElementById('pauseOverlay');
 
         // Draw the room
         function drawRoom() {
@@ -640,8 +672,12 @@
         // Update terminal text
         function updateTerminal(text) {
             const terminal = document.getElementById('terminal-content');
+            // Check if user is near bottom before appending new text
+            const isNearBottom = (terminal.scrollHeight - terminal.scrollTop - terminal.clientHeight) < 20;
             terminal.innerHTML += `<br>${text}`;
-            terminal.scrollTop = terminal.scrollHeight;
+            if (isNearBottom) {
+                terminal.scrollTop = terminal.scrollHeight;
+            }
         }
 
         // Update inventory display
@@ -669,17 +705,27 @@
         }
 
         // Timer countdown
+        let timerInterval;
         function startTimer() {
-            setInterval(() => {
-                if (gameState.timer > 0) {
+            timerInterval = setInterval(() => {
+                if (!gameState.isPaused && gameState.timer > 0) {
                     gameState.timer--;
                     updateTimer();
                     saveGameState();
-                } else {
+                } else if (gameState.timer <= 0) {
                     gameOverModal.style.display = 'block';
                 }
             }, 1000);
         }
+
+        // Pause button
+        const pauseButton = document.getElementById('pauseButton');
+        pauseButton.addEventListener('click', () => {
+            gameState.isPaused = !gameState.isPaused;
+            pauseButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
+            pauseOverlay.style.display = gameState.isPaused ? 'flex' : 'none';
+            saveGameState();
+        });
 
         // Initialize game
         loadGameState();
