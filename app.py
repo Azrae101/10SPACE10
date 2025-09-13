@@ -18,5 +18,9 @@ def room2():
 def room3():
     return render_template('room3.html')
 
+@app.route('/room4')
+def room4():
+    return render_template('room4.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
