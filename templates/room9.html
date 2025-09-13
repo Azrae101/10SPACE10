@@ -337,7 +337,7 @@
             <h2 class="puzzle-title">MYSTERIOUS NOTE</h2>
             <div class="note-text">
                 The note contains a single letter:<br><br>
-                <div style="text-align: center; font-size: 48px; color: #ff2c7d;">K</div>
+                <div style="text-align: center; font-size: 48px; color: #ff2c7d;">C</div>
             </div>
             <button class="puzzle-button" id="takeNote">Take Note</button>
         </div>
@@ -541,9 +541,9 @@
         takeNoteBtn.addEventListener('click', () => {
             if (!gameState.hasNote) {
                 gameState.hasNote = true;
-                gameState.inventory.push('Note with "K"');
+                gameState.inventory.push('Note with "C"');
                 updateInventory();
-                updateTerminal("> You took the mysterious note with the letter 'K'.");
+                updateTerminal("> You took the mysterious note with the letter 'C'.");
                 
                 // Remove the note from the locker object
                 const locker = roomObjects.find(obj => obj.id === 'locker2');
