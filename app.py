@@ -22,5 +22,9 @@ def room3():
 def room4():
     return render_template('room4.html')
 
+@app.route('/room5')
+def room5():
+    return render_template('room5.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
