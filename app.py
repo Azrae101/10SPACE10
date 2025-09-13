@@ -10,7 +10,7 @@ def index():
 def room1():
     return render_template('room1.html')
 
-@app.route('/room2')
+@app.route('/room2') # Room 4 in notes
 def room2():
     return render_template('room2.html')
 
@@ -18,5 +18,5 @@ def room2():
 def room3():
     return render_template('room3.html')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+#if __name__ == '__main__':
+#    app.run(debug=True)
