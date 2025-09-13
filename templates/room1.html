@@ -306,7 +306,7 @@
 
         <div id="gameOverModal" class="game-over-modal">
             <h2 class="game-over-title">GAME OVER</h2>
-            <p class="game-over-content">Time has run out! The space station's systems have failed.</p>
+            <p class="game-over-content">The space ship crashed, try again.</p>
             <button class="game-over-button" id="restartButton">Restart Game</button>
         </div>
 
@@ -319,14 +319,13 @@
 
     <div id="settingsDropdown" class="settings-dropdown">
         <button id="pauseResumeButton" class="settings-option">Pause</button>
-        <button id="musicToggleButton" class="settings-option">Music: ON</button>
         <button id="settingsRestartButton" class="settings-option">Restart</button>
     </div>
 
     <div class="ui-container">
         <div class="status-panel">
             <div class="status-item">
-                <span class="status-label">TIME REMAINING:</span>
+                <span class="status-label">TIME UNTIL IMPACT:</span>
                 <div id="timer">10:00</div>
             </div>
             <div class="status-item">
@@ -352,8 +351,6 @@
         </div>
     </div>
 
-    <audio id="bgMusic" loop></audio>
-
     <script>
         // Game state
         let gameState = {
@@ -363,8 +360,7 @@
             hasKey: false,
             tileLifted: false,
             doorUnlocked: false,
-            isPaused: false,
-            musicOn: true
+            isPaused: false
         };
 
         // Load game state from localStorage
@@ -499,9 +495,6 @@
         liftTileBtn.addEventListener('click', () => {
             if (!gameState.tileLifted) {
                 gameState.tileLifted = true;
-                gameState.hasKey = true;
-                gameState.inventory.push('Access Key');
-                updateInventory();
                 updateTerminal("> You lifted the loose tile and found an Access Key!");
                 puzzleModal.style.display = 'none';
                 saveGameState();
@@ -513,13 +506,39 @@
         const restartButton = document.getElementById('restartButton');
 
         // Restart button
-        settingsRestartButton.addEventListener('click', () => {
+        restartButton.addEventListener('click', () => {
             localStorage.removeItem('spaceStationGameState');
-            window.location.href = '/room1';
+            window.location.href = '/1';
         });
 
         // Pause overlay element
         const pauseOverlay = document.getElementById('pauseOverlay');
+
+        // Settings button
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsDropdown = document.getElementById('settingsDropdown');
+        const pauseResumeButton = document.getElementById('pauseResumeButton');
+        const settingsRestartButton = document.getElementById('settingsRestartButton');
+
+        // Settings button click
+        settingsButton.addEventListener('click', () => {
+            settingsDropdown.style.display = settingsDropdown.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        // Pause/Resume button in settings
+        pauseResumeButton.addEventListener('click', () => {
+            gameState.isPaused = !gameState.isPaused;
+            pauseResumeButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
+            pauseButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
+            pauseOverlay.style.display = gameState.isPaused ? 'flex' : 'none';
+            saveGameState();
+        });
+
+        // Restart button in settings
+        settingsRestartButton.addEventListener('click', () => {
+            localStorage.removeItem('spaceStationGameState');
+            window.location.href = '/1';
+        });
 
         // Draw the room
         function drawRoom() {
@@ -642,17 +661,20 @@
                         break;
 
                     case 'flashlight':
-                        // Draw flashlight body (cylinder-like)
-                        ctx.fillStyle = '#333333';
-                        ctx.fillRect(obj.x + 2, obj.y, obj.width - 4, obj.height);
-                        // Draw lens
-                        ctx.fillStyle = '#ffff00';
-                        ctx.beginPath();
-                        ctx.arc(obj.x + obj.width / 2, obj.y + obj.height / 2, 8, 0, Math.PI * 2);
-                        ctx.fill();
-                        // Draw switch
-                        ctx.fillStyle = '#666666';
-                        ctx.fillRect(obj.x + obj.width - 5, obj.y + 5, 3, 10);
+                        // Only draw if not in inventory
+                        if (!gameState.inventory.includes('Flashlight')) {
+                            // Draw flashlight body (cylinder-like)
+                            ctx.fillStyle = '#333333';
+                            ctx.fillRect(obj.x + 2, obj.y, obj.width - 4, obj.height);
+                            // Draw lens
+                            ctx.fillStyle = '#ffff00';
+                            ctx.beginPath();
+                            ctx.arc(obj.x + obj.width / 2, obj.y + obj.height / 2, 8, 0, Math.PI * 2);
+                            ctx.fill();
+                            // Draw switch
+                            ctx.fillStyle = '#666666';
+                            ctx.fillRect(obj.x + obj.width - 5, obj.y + 5, 3, 10);
+                        }
                         break;
                 }
             });
@@ -792,7 +814,7 @@
                         // Transition to next room
                         gameState.currentRoom = 'room2';
                         saveGameState();
-                        window.location.href = '/room2';
+                        window.location.href = '/2';
                     }
                     break;
 
@@ -870,47 +892,9 @@
         pauseButton.addEventListener('click', () => {
             gameState.isPaused = !gameState.isPaused;
             pauseButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
-            pauseOverlay.style.display = gameState.isPaused ? 'flex' : 'none';
-            saveGameState();
-        });
-
-        // Settings button
-        const settingsButton = document.getElementById('settingsButton');
-        const settingsDropdown = document.getElementById('settingsDropdown');
-        const pauseResumeButton = document.getElementById('pauseResumeButton');
-        const musicToggleButton = document.getElementById('musicToggleButton');
-        const settingsRestartButton = document.getElementById('settingsRestartButton');
-
-        // Settings button click
-        settingsButton.addEventListener('click', () => {
-            settingsDropdown.style.display = settingsDropdown.style.display === 'flex' ? 'none' : 'flex';
-        });
-
-        // Pause/Resume button
-        pauseResumeButton.addEventListener('click', () => {
-            gameState.isPaused = !gameState.isPaused;
             pauseResumeButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
-            pauseButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
             pauseOverlay.style.display = gameState.isPaused ? 'flex' : 'none';
             saveGameState();
-        });
-
-        // Music toggle button
-        musicToggleButton.addEventListener('click', () => {
-            gameState.musicOn = !gameState.musicOn;
-            musicToggleButton.textContent = gameState.musicOn ? 'Music: ON' : 'Music: OFF';
-            if (gameState.musicOn) {
-                bgMusic.play();
-            } else {
-                bgMusic.pause();
-            }
-            saveGameState();
-        });
-
-        // Restart button
-        restartButton.addEventListener('click', () => {
-            localStorage.removeItem('spaceStationGameState');
-            window.location.href = '/room1';
         });
 
         // Initialize game
@@ -920,7 +904,6 @@
         updateInventory();
         startTimer();
         gameLoop();
-
     </script>
 </body>
 </html>
