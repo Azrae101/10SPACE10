@@ -413,7 +413,7 @@
             {
                 type: 'floor_tile',
                 x: 250,
-                y: 250,
+                y: 600,
                 width: 40,
                 height: 40,
                 interactive: true,
@@ -423,7 +423,7 @@
             {
                 type: 'door',
                 x: 600,
-                y: 200,
+                y: 550,
                 width: 80,
                 height: 160,
                 interactive: true,
@@ -432,7 +432,7 @@
             {
                 type: 'equipment',
                 x: 150,
-                y: 150,
+                y: 600,
                 width: 60,
                 height: 60,
                 interactive: false
@@ -440,7 +440,7 @@
             {
                 type: 'equipment',
                 x: 400,
-                y: 350,
+                y: 620,
                 width: 80,
                 height: 40,
                 interactive: false
@@ -448,7 +448,7 @@
             {
                 type: 'console',
                 x: 100,
-                y: 400,
+                y: 620,
                 width: 120,
                 height: 60,
                 interactive: true
@@ -456,7 +456,7 @@
             {
                 type: 'flashlight',
                 x: 300,
-                y: 350,
+                y: 630,
                 width: 20,
                 height: 20,
                 interactive: true,
@@ -576,12 +576,10 @@
             // Set background image position and size
             if (!bgLoaded) {
                 if (bgImage.complete) {
-                    // Calculate scale to make image height equal to canvas height, keep aspect ratio
-                    const scale = canvas.height / bgImage.naturalHeight;
-                    bgScaledWidth = bgImage.naturalWidth * scale;
+                    // Make image quadratic and touch the top
+                    bgScaledWidth = canvas.width;
                     bgScaledHeight = canvas.height;
-                    // Calculate x to center the image horizontally
-                    bgX = (canvas.width - bgScaledWidth) / 2;
+                    bgX = 0;
                     bgY = 0;
                     // Position the background image
                     bgImage.style.left = bgX + 'px';
@@ -595,10 +593,10 @@
                     player.y = bgY + bgScaledHeight - 100;
                 } else {
                     bgImage.onload = () => {
-                        const scale = canvas.height / bgImage.naturalHeight;
-                        bgScaledWidth = bgImage.naturalWidth * scale;
+                        // Make image quadratic and touch the top
+                        bgScaledWidth = canvas.width;
                         bgScaledHeight = canvas.height;
-                        bgX = (canvas.width - bgScaledWidth) / 2;
+                        bgX = 0;
                         bgY = 0;
                         bgImage.style.left = bgX + 'px';
                         bgImage.style.top = bgY + 'px';
@@ -752,11 +750,11 @@
             // Constrain player to background image area
             if (bgLoaded) {
                 player.x = Math.max(bgX + player.radius, Math.min(bgX + bgScaledWidth - player.radius, player.x));
-                player.y = Math.max(bgY + player.radius, Math.min(bgY + bgScaledHeight - player.radius, player.y));
+                player.y = Math.max(bgY + 615, Math.min(bgY + bgScaledHeight - player.radius, player.y)); // Adjusted min y to 615
             } else {
                 // Fallback constraints if background not loaded yet
                 player.x = Math.max(player.radius + 30, Math.min(canvas.width - player.radius - 30, player.x));
-                player.y = Math.max(player.radius + 30, Math.min(canvas.height - player.radius - 30, player.y));
+                player.y = Math.max(615, Math.min(canvas.height - player.radius - 30, player.y)); // Adjusted min y to 615
             }
 
             // Check for nearby objects

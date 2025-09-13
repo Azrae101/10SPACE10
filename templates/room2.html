@@ -348,7 +348,7 @@
             <div id="terminal-content">
                 > You have entered the corridor leading to the escape pods.<br>
                 > The corridor is dimly lit, with emergency lights flickering.<br>
-                > There's a security panel blocking the exit. You need to find the code.<br>
+                > There's a locked door ahead. You need to find a way to open it.<br>
                 > Use WASD to move around and SPACE to interact with objects.
             </div>
         </div>
@@ -401,9 +401,17 @@
         // All objects moved to the bottom of the wall, right over the floor
         const roomObjects = [
             {
+                type: 'door_to_room3',
+                x: 750,
+                y: 820,
+                width: 100,
+                height: 200,
+                interactive: true
+            },
+            {
                 type: 'security_panel',
                 x: 900,
-                y: 550, // Moved to bottom
+                y: 820,
                 width: 100,
                 height: 160,
                 interactive: true,
@@ -412,7 +420,7 @@
             {
                 type: 'vent',
                 x: 300,
-                y: 580, // Moved to bottom
+                y: 830,
                 width: 100,
                 height: 60,
                 interactive: true
@@ -420,7 +428,7 @@
             {
                 type: 'emergency_light',
                 x: 200,
-                y: 580, // Moved to bottom
+                y: 830,
                 width: 50,
                 height: 50,
                 interactive: false
@@ -428,15 +436,15 @@
             {
                 type: 'emergency_light',
                 x: 800,
-                y: 580, // Moved to bottom
+                y: 830,
                 width: 50,
                 height: 50,
                 interactive: false
             },
             {
                 type: 'door_back',
-                x: 100,
-                y: 550, // Moved to bottom
+                x: 30,
+                y: 820,
                 width: 100,
                 height: 200,
                 interactive: true
@@ -444,7 +452,7 @@
             {
                 type: 'console',
                 x: 500,
-                y: 580, // Moved to bottom
+                y: 830,
                 width: 140,
                 height: 80,
                 interactive: true
@@ -452,7 +460,7 @@
             {
                 type: 'toolbox',
                 x: 600,
-                y: 580, // Moved to bottom
+                y: 830,
                 width: 80,
                 height: 60,
                 interactive: true,
@@ -462,7 +470,7 @@
 
         // Player properties
         const player = {
-            x: canvas.width / 2,
+            x: 200, // Spawn right side of the door
             y: canvas.height - 100, // Start player on the floor
             radius: 15,
             color: '#4afcff',
@@ -508,7 +516,7 @@
         // Submit code button
         submitCodeBtn.addEventListener('click', () => {
             const code = codeInput.value.trim();
-            if (code === 'OMEGA') {
+            if (code === 'omega') {
                 gameState.exitUnlocked = true;
                 updateTerminal("> Access granted! The exit is now unlocked.");
                 puzzleModal.style.display = 'none';
@@ -566,7 +574,7 @@
 
             // Draw floor tiles
             for (let x = 0; x < canvas.width; x += 40) {
-                for (let y = canvas.height - 150; y < canvas.height; y += 40) {
+                for (let y = 820; y < canvas.height; y += 40) { // Adjusted floor top to 820
                     const isAlt = ((x / 40) + (y / 40)) % 2 === 0;
                     ctx.fillStyle = isAlt ? '#333355' : '#2a2a44';
                     ctx.fillRect(x, y, 40, 40);
@@ -594,8 +602,8 @@
                 ctx.fillStyle = 'rgba(255, 252, 0, 0.1)';
                 ctx.beginPath();
                 ctx.moveTo(i + 60, 65);
-                ctx.lineTo(i + 30, canvas.height - 150);
-                ctx.lineTo(i + 90, canvas.height - 150);
+                ctx.lineTo(i + 30, 820);
+                ctx.lineTo(i + 90, 820);
                 ctx.closePath();
                 ctx.fill();
             }
@@ -647,19 +655,17 @@
                         break;
 
                     case 'door_back':
-                        ctx.fillStyle = '#5d4037';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                        // Draw door image instead of rectangle
+                        const doorBackImg = new Image();
+                        doorBackImg.src = '/static/door.png';
+                        ctx.drawImage(doorBackImg, obj.x, obj.y, obj.width, obj.height);
+                        break;
 
-                        // Door details
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(obj.x + 15, obj.y + 30, 8, 140);
-                        ctx.fillRect(obj.x + obj.width - 23, obj.y + 30, 8, 140);
-
-                        // Door handle
-                        ctx.fillStyle = '#fffc00';
-                        ctx.beginPath();
-                        ctx.arc(obj.x + 30, obj.y + obj.height/2, 12, 0, Math.PI * 2);
-                        ctx.fill();
+                    case 'door_to_room3':
+                        // Draw door image instead of rectangle
+                        const doorRoom3Img = new Image();
+                        doorRoom3Img.src = '/static/door.png';
+                        ctx.drawImage(doorRoom3Img, obj.x, obj.y, obj.width, obj.height);
                         break;
                         
                     case 'console':
@@ -722,6 +728,11 @@
                 ctx.arc(light.x, light.y, light.radius, 0, Math.PI * 2);
                 ctx.fill();
             });
+
+            // Draw the letter E
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '48px Arial';
+            ctx.fillText('E', 500, 500);
         }
 
         // Update game state
@@ -734,7 +745,7 @@
             if (keys['d'] || keys['arrowright']) { player.x += player.speed; player.direction = 'right'; moved = true; }
 
             // Constrain player to floor area only (not walls)
-            const floorTop = canvas.height - 150;
+            const floorTop = 820; // Adjusted to objects' y position
             player.x = Math.max(player.radius + 30, Math.min(canvas.width - player.radius - 30, player.x));
             player.y = Math.max(floorTop + player.radius, Math.min(canvas.height - player.radius - 30, player.y));
 
@@ -783,6 +794,19 @@
         // Interact with objects
         function interactWithObject(obj) {
             switch (obj.type) {
+                case 'door_to_room3':
+                    if (!gameState.exitUnlocked) {
+                        updateTerminal("> The door is locked. You need to pass the security ID-check first.");
+                    } else if (!gameState.inventory.includes('Access Key')) {
+                        updateTerminal("> The door is locked. You need a key to open it.");
+                    } else {
+                        updateTerminal("> You used the key to open the door to Room 3.");
+                        gameState.currentRoom = 'room3';
+                        saveGameState();
+                        window.location.href = '/3';
+                    }
+                    break;
+
                 case 'security_panel':
                     if (!gameState.exitUnlocked) {
                         puzzleModal.style.display = 'block';

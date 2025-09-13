@@ -290,7 +290,7 @@
         <div id="puzzleModal" class="puzzle-modal">
             <button class="close-button" id="closePuzzle">✕</button>
             <h2 class="puzzle-title" id="puzzleTitle">SCREWDRIVER</h2>
-            <p class="puzzle-content" id="puzzleContent">You found a screwdriver! You can use it to open the air-conditioner.</p>
+            <p class="puzzle-content" id="puzzleContent">You found a screwdriver! You can use it to open the vent.</p>
             <button class="puzzle-button" id="closeScrewdriver">Close</button>
         </div>
 
@@ -336,7 +336,7 @@
         > The library is bigger now, filled with many shelves of books.<br />
         > There are doors to the left and right.<br />
         > A tiny robot is running around the room.<br />
-        > You can pick up the robot and use it on the air conditioner.<br />
+        > You can pick up the robot and use it on the vent.<br />
         > Press the "robot" button in your inventory to use it.<br />
         > Try interacting with the book.
             </div>
@@ -350,7 +350,7 @@
             timer: 600, // 10 minutes in seconds
             inventory: [],
             hasScrewdriver: false,
-            airConditionerOpen: false,
+            ventOpen: false,
             isPaused: false
         };
 
@@ -445,7 +445,7 @@
             },
             {
                 type: 'door',
-                x: 770,
+                x: 1170,
                 y: 250,
                 width: 30,
                 height: 100,
@@ -463,7 +463,7 @@
                 pickedUp: false
             },
             {
-                type: 'air_conditioner',
+                type: 'vent',
                 x: 600,
                 y: 200,
                 width: 80,
@@ -486,6 +486,10 @@
         // Load player image
         const playerImage = new Image();
         playerImage.src = '/static/chr.png';
+
+        // Load door image
+        const doorImage = new Image();
+        doorImage.src = '/static/side_door.png';
 
         // Input handling
         const keys = {};
@@ -583,17 +587,22 @@
                         break;
 
                     case 'door':
-                        ctx.fillStyle = '#222244';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                        ctx.strokeStyle = '#4afcff';
-                        ctx.lineWidth = 3;
-                        ctx.strokeRect(obj.x, obj.y, obj.width, obj.height);
-                        // Draw door handle
-                        ctx.fillStyle = '#4afcff';
-                        if (obj.direction === 'left') {
-                            ctx.fillRect(obj.x + obj.width - 10, obj.y + obj.height / 2 - 5, 8, 10);
+                        if (doorImage.complete) {
+                            ctx.drawImage(doorImage, obj.x, obj.y, obj.width, obj.height);
                         } else {
-                            ctx.fillRect(obj.x + 2, obj.y + obj.height / 2 - 5, 8, 10);
+                            // Fallback to rectangle if image not loaded
+                            ctx.fillStyle = '#222244';
+                            ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                            ctx.strokeStyle = '#4afcff';
+                            ctx.lineWidth = 3;
+                            ctx.strokeRect(obj.x, obj.y, obj.width, obj.height);
+                            // Draw door handle
+                            ctx.fillStyle = '#4afcff';
+                            if (obj.direction === 'left') {
+                                ctx.fillRect(obj.x + obj.width - 10, obj.y + obj.height / 2 - 5, 8, 10);
+                            } else {
+                                ctx.fillRect(obj.x + 2, obj.y + obj.height / 2 - 5, 8, 10);
+                            }
                         }
                         break;
 
@@ -616,11 +625,11 @@
                         }
                         break;
 
-                    case 'air_conditioner':
+                    case 'vent':
                         ctx.fillStyle = obj.locked ? '#555577' : '#7cb342';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
 
-                        // Draw air-conditioner grill lines
+                        // Draw vent grill lines
                         ctx.strokeStyle = '#333366';
                         ctx.lineWidth = 2;
                         for (let i = 0; i < 5; i++) {
@@ -707,7 +716,7 @@
                         gameState.inventory.push('Robot');
                         updateInventory();
                         updateTerminal("> You picked up the tiny robot!");
-                        updateTerminal("> Click on the Robot in your inventory to use it on the air conditioner.");
+                        updateTerminal("> Click on the Robot in your inventory to use it on the vent.");
                         saveGameState();
                     }
                     break;
@@ -722,18 +731,18 @@
                     }
                     break;
 
-                case 'air_conditioner':
+                case 'vent':
                     if (obj.locked) {
                         if (gameState.hasScrewdriver) {
                             obj.locked = false;
-                            gameState.airConditionerOpen = true;
-                            updateTerminal("> You used the screwdriver to open the air-conditioner!");
+                            gameState.ventOpen = true;
+                            updateTerminal("> You used the screwdriver to open the vent!");
                             saveGameState();
                         } else {
-                            updateTerminal("> The air conditioner is locked. You need a tool to open it.");
+                            updateTerminal("> The vent is locked. You need a tool to open it.");
                         }
                     } else {
-                        updateTerminal("> The air conditioner is already open.");
+                        updateTerminal("> The vent is already open.");
                     }
                     break;
             }
@@ -766,7 +775,7 @@
                     // Make robot inventory item clickable to use it
                     if (item === 'Robot') {
                         itemElement.style.cursor = 'pointer';
-                        itemElement.title = 'Click to use the robot on the air conditioner';
+                        itemElement.title = 'Click to use the robot on the vent';
                         itemElement.addEventListener('click', () => {
                             useRobot();
                         });
@@ -786,19 +795,19 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Use robot on air conditioner
+        // Use robot on vent
         function useRobot() {
             if (gameState.inventory.includes('Robot')) {
-                const ac = roomObjects.find(obj => obj.type === 'air_conditioner');
-                if (ac && ac.locked) {
-                    ac.locked = false;
-                    gameState.airConditionerOpen = true;
-                    updateTerminal("> You used the robot to open the air-conditioner!");
+                const vent = roomObjects.find(obj => obj.type === 'vent');
+                if (vent && vent.locked) {
+                    vent.locked = false;
+                    gameState.ventOpen = true;
+                    updateTerminal("> The robot went in the vent and came back with a note stating the letter \"G\"");
                     saveGameState();
-                } else if (ac && !ac.locked) {
-                    updateTerminal("> The air-conditioner is already open.");
+                } else if (vent && !vent.locked) {
+                    updateTerminal("> The robot went in the vent and came back with a note stating the letter \"G\"");
                 } else {
-                    updateTerminal("> There is no air-conditioner here.");
+                    updateTerminal("> There is no vent here.");
                 }
             } else {
                 updateTerminal("> You don't have the robot in your inventory.");
@@ -863,13 +872,13 @@
                 timer: 600,
                 inventory: [],
                 hasScrewdriver: false,
-                airConditionerOpen: false,
+                ventOpen: false,
                 isPaused: false
             };
             // Reset room objects
             roomObjects.forEach(obj => {
                 if (obj.type === 'robot') obj.pickedUp = false;
-                if (obj.type === 'air_conditioner') obj.locked = true;
+                if (obj.type === 'vent') obj.locked = true;
             });
             // Clear localStorage
             localStorage.removeItem('spaceStationGameState');
@@ -908,13 +917,13 @@
                 timer: 600,
                 inventory: [],
                 hasScrewdriver: false,
-                airConditionerOpen: false,
+                ventOpen: false,
                 isPaused: false
             };
             // Reset room objects
             roomObjects.forEach(obj => {
                 if (obj.type === 'robot') obj.pickedUp = false;
-                if (obj.type === 'air_conditioner') obj.locked = true;
+                if (obj.type === 'vent') obj.locked = true;
             });
             // Clear localStorage
             localStorage.removeItem('spaceStationGameState');
