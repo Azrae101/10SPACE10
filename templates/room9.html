@@ -337,7 +337,7 @@
             <h2 class="puzzle-title">MYSTERIOUS NOTE</h2>
             <div class="note-text">
                 The note contains a single letter:<br><br>
-                <div style="text-align: center; font-size: 48px; color: #ff2c7d;">K</div>
+                <div style="text-align: center; font-size: 48px; color: #ff2c7d;">C</div>
             </div>
             <button class="puzzle-button" id="takeNote">Take Note</button>
         </div>
@@ -440,7 +440,60 @@
         }
 
         // Room layout and objects for broom closet
-        const roomObjects = [];
+        const roomObjects = [
+            {
+                type: 'locker',
+                id: 'locker1',
+                x: 300,
+                y: 400,
+                width: 100,
+                height: 200,
+                interactive: true,
+                item: 'Wrench'
+            },
+            {
+                type: 'locker',
+                id: 'locker2',
+                x: 500,
+                y: 400,
+                width: 100,
+                height: 200,
+                interactive: true,
+                item: 'Note with "C"'
+            },
+            {
+                type: 'broom',
+                x: 700,
+                y: 500,
+                width: 10,
+                height: 100,
+                interactive: false
+            },
+            {
+                type: 'bucket',
+                x: 750,
+                y: 550,
+                width: 50,
+                height: 70,
+                interactive: false
+            },
+            {
+                type: 'shelf',
+                x: 200,
+                y: 300,
+                width: 200,
+                height: 300,
+                interactive: false
+            },
+            {
+                type: 'door',
+                x: 900,
+                y: 300,
+                width: 100,
+                height: 200,
+                interactive: true
+            }
+        ];
 
         // Background image scaled dimensions
         let bgScaledWidth = 200; // default
@@ -541,9 +594,9 @@
         takeNoteBtn.addEventListener('click', () => {
             if (!gameState.hasNote) {
                 gameState.hasNote = true;
-                gameState.inventory.push('Note with "K"');
+                gameState.inventory.push('Note with "C"');
                 updateInventory();
-                updateTerminal("> You took the mysterious note with the letter 'K'.");
+                updateTerminal("> You took the mysterious note with the letter 'C'.");
                 
                 // Remove the note from the locker object
                 const locker = roomObjects.find(obj => obj.id === 'locker2');
@@ -597,162 +650,162 @@
 
         // Draw the room (broom closet)
         function drawRoom() {
-        // Set background img position and size
-        if (!bgLoaded) {
-            if (bgImage.complete) {
-                // Get actual rendered canvas dimensions
-                const rect = canvas.getBoundingClientRect();
-                const renderedWidth = rect.width;
-                const renderedHeight = rect.height;
-                // Calculate scale to make image height equal to rendered canvas height, keep aspect ratio
-                const scale = renderedHeight / bgImage.naturalHeight;
-                bgScaledWidth = bgImage.naturalWidth * scale;
-                bgScaledHeight = renderedHeight;
-                // Calculate x to center the image horizontally
-                const x = (renderedWidth - bgScaledWidth) / 2;
-                bgImage.style.left = x + 'px';
-                bgImage.style.width = bgScaledWidth + 'px';
-                bgImage.style.height = bgScaledHeight + 'px';
-                // Position player at bottom of background image, moved down 100px
-                player.y = bgScaledHeight - 200;
-                bgLoaded = true;
-            } else {
-                bgImage.onload = () => {
+            // Set background img position and size
+            if (!bgLoaded) {
+                if (bgImage.complete) {
+                    // Get actual rendered canvas dimensions
                     const rect = canvas.getBoundingClientRect();
                     const renderedWidth = rect.width;
                     const renderedHeight = rect.height;
+                    // Calculate scale to make image height equal to rendered canvas height, keep aspect ratio
                     const scale = renderedHeight / bgImage.naturalHeight;
                     bgScaledWidth = bgImage.naturalWidth * scale;
                     bgScaledHeight = renderedHeight;
+                    // Calculate x to center the image horizontally
                     const x = (renderedWidth - bgScaledWidth) / 2;
                     bgImage.style.left = x + 'px';
                     bgImage.style.width = bgScaledWidth + 'px';
                     bgImage.style.height = bgScaledHeight + 'px';
+                    // Position player at bottom of background image, moved down 100px
+                    player.y = bgScaledHeight - 200;
                     bgLoaded = true;
-                };
+                } else {
+                    bgImage.onload = () => {
+                        const rect = canvas.getBoundingClientRect();
+                        const renderedWidth = rect.width;
+                        const renderedHeight = rect.height;
+                        const scale = renderedHeight / bgImage.naturalHeight;
+                        bgScaledWidth = bgImage.naturalWidth * scale;
+                        bgScaledHeight = renderedHeight;
+                        const x = (renderedWidth - bgScaledWidth) / 2;
+                        bgImage.style.left = x + 'px';
+                        bgImage.style.width = bgScaledWidth + 'px';
+                        bgImage.style.height = bgScaledHeight + 'px';
+                        bgLoaded = true;
+                    };
+                }
             }
-        }
 
-        // Clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw objects
-        roomObjects.forEach(obj => {
-            switch (obj.type) {
-                case 'locker':
-                    if (obj.id === 'locker1') {
-                        // First locker (already open)
-                        ctx.fillStyle = '#555577';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                        
-                        // Locker details
-                        ctx.fillStyle = '#333355';
-                        ctx.fillRect(obj.x + 5, obj.y + 5, obj.width - 10, obj.height - 10);
-                        
-                        // Draw wrench if not taken
-                        if (obj.item && !gameState.hasWrench) {
-                            ctx.fillStyle = '#8888aa';
-                            // Wrench handle
-                            ctx.fillRect(obj.x + 30, obj.y + 80, 20, 5);
-                            // Wrench head
+            // Draw objects
+            roomObjects.forEach(obj => {
+                switch (obj.type) {
+                    case 'locker':
+                        if (obj.id === 'locker1') {
+                            // First locker (already open)
+                            ctx.fillStyle = '#555577';
+                            ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                            
+                            // Locker details
+                            ctx.fillStyle = '#333355';
+                            ctx.fillRect(obj.x + 5, obj.y + 5, obj.width - 10, obj.height - 10);
+                            
+                            // Draw wrench if not taken
+                            if (obj.item && !gameState.hasWrench) {
+                                ctx.fillStyle = '#8888aa';
+                                // Wrench handle
+                                ctx.fillRect(obj.x + 30, obj.y + 80, 20, 5);
+                                // Wrench head
+                                ctx.beginPath();
+                                ctx.arc(obj.x + 30, obj.y + 80, 8, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        } else {
+                            // Second locker (locked)
+                            ctx.fillStyle = '#555577';
+                            ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                            
+                            // Lock symbol
+                            ctx.fillStyle = '#ff2c7d';
                             ctx.beginPath();
-                            ctx.arc(obj.x + 30, obj.y + 80, 8, 0, Math.PI * 2);
+                            ctx.arc(obj.x + obj.width/2, obj.y + 50, 10, 0, Math.PI * 2);
                             ctx.fill();
+                            
+                            // Keyhole
+                            ctx.fillStyle = '#000';
+                            ctx.fillRect(obj.x + obj.width/2 - 2, obj.y + 50, 4, 10);
                         }
-                    } else {
-                        // Second locker (locked)
-                        ctx.fillStyle = '#555577';
+                        break;
+
+                    case 'broom':
+                        // Broom stick
+                        ctx.fillStyle = '#8b4513';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
                         
-                        // Lock symbol
-                        ctx.fillStyle = '#ff2c7d';
+                        // Broom head
+                        ctx.fillStyle = '#a52a2a';
+                        ctx.fillRect(obj.x - 10, obj.y, 40, 20);
+                        break;
+
+                    case 'bucket':
+                        // Bucket body
+                        ctx.fillStyle = '#8888aa';
                         ctx.beginPath();
-                        ctx.arc(obj.x + obj.width/2, obj.y + 50, 10, 0, Math.PI * 2);
+                        ctx.moveTo(obj.x, obj.y + obj.height);
+                        ctx.lineTo(obj.x + obj.width, obj.y + obj.height);
+                        ctx.lineTo(obj.x + obj.width - 10, obj.y);
+                        ctx.lineTo(obj.x + 10, obj.y);
+                        ctx.closePath();
                         ctx.fill();
                         
-                        // Keyhole
+                        // Bucket handle
+                        ctx.strokeStyle = '#8888aa';
+                        ctx.lineWidth = 3;
+                        ctx.beginPath();
+                        ctx.arc(obj.x + obj.width/2, obj.y - 5, 15, Math.PI, 0, false);
+                        ctx.stroke();
+                        break;
+
+                    case 'shelf':
+                        // Shelf boards
+                        ctx.fillStyle = '#8b5a2b';
+                        ctx.fillRect(obj.x, obj.y, obj.width, 20);
+                        ctx.fillRect(obj.x, obj.y + 100, obj.width, 20);
+                        ctx.fillRect(obj.x, obj.y + 200, obj.width, 20);
+                        
+                        // Shelf supports
+                        ctx.fillRect(obj.x, obj.y, 20, obj.height);
+                        ctx.fillRect(obj.x + obj.width - 20, obj.y, 20, obj.height);
+                        
+                        // Draw some cleaning supplies on shelves
+                        ctx.fillStyle = '#555577';
+                        ctx.fillRect(obj.x + 30, obj.y + 30, 30, 30); // Spray bottle
+                        ctx.fillRect(obj.x + 80, obj.y + 30, 40, 20); // Box
+                        ctx.fillRect(obj.x + 40, obj.y + 130, 20, 40); // Bottle
+                        break;
+
+                    case 'door':
+                        ctx.fillStyle = '#2a201b';
+                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+
+                        // Door details
                         ctx.fillStyle = '#000';
-                        ctx.fillRect(obj.x + obj.width/2 - 2, obj.y + 50, 4, 10);
-                    }
-                    break;
+                        ctx.fillRect(obj.x + 10, obj.y + 20, 5, 120); // Door frame
+                        ctx.fillRect(obj.x + obj.width - 15, obj.y + 20, 5, 120); // Door frame
 
-                case 'broom':
-                    // Broom stick
-                    ctx.fillStyle = '#8b4513';
-                    ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                    
-                    // Broom head
-                    ctx.fillStyle = '#a52a2a';
-                    ctx.fillRect(obj.x - 10, obj.y, 40, 20);
-                    break;
+                        // Draw door handle
+                        ctx.fillStyle = '#fffc00';
+                        ctx.beginPath();
+                        ctx.arc(obj.x + 60, obj.y + obj.height/2, 8, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                }
+            });
 
-                case 'bucket':
-                    // Bucket body
-                    ctx.fillStyle = '#8888aa';
-                    ctx.beginPath();
-                    ctx.moveTo(obj.x, obj.y + obj.height);
-                    ctx.lineTo(obj.x + obj.width, obj.y + obj.height);
-                    ctx.lineTo(obj.x + obj.width - 10, obj.y);
-                    ctx.lineTo(obj.x + 10, obj.y);
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    // Bucket handle
-                    ctx.strokeStyle = '#8888aa';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(obj.x + obj.width/2, obj.y - 5, 15, Math.PI, 0, false);
-                    ctx.stroke();
-                    break;
-
-                case 'shelf':
-                    // Shelf boards
-                    ctx.fillStyle = '#8b5a2b';
-                    ctx.fillRect(obj.x, obj.y, obj.width, 20);
-                    ctx.fillRect(obj.x, obj.y + 100, obj.width, 20);
-                    ctx.fillRect(obj.x, obj.y + 200, obj.width, 20);
-                    
-                    // Shelf supports
-                    ctx.fillRect(obj.x, obj.y, 20, obj.height);
-                    ctx.fillRect(obj.x + obj.width - 20, obj.y, 20, obj.height);
-                    
-                    // Draw some cleaning supplies on shelves
-                    ctx.fillStyle = '#555577';
-                    ctx.fillRect(obj.x + 30, obj.y + 30, 30, 30); // Spray bottle
-                    ctx.fillRect(obj.x + 80, obj.y + 30, 40, 20); // Box
-                    ctx.fillRect(obj.x + 40, obj.y + 130, 20, 40); // Bottle
-                    break;
-
-                case 'door':
-                    ctx.fillStyle = '#2a201b';
-                    ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-
-                    // Door details
-                    ctx.fillStyle = '#000';
-                    ctx.fillRect(obj.x + 10, obj.y + 20, 5, 120); // Door frame
-                    ctx.fillRect(obj.x + obj.width - 15, obj.y + 20, 5, 120); // Door frame
-
-                    // Draw door handle
-                    ctx.fillStyle = '#fffc00';
-                    ctx.beginPath();
-                    ctx.arc(obj.x + 60, obj.y + obj.height/2, 8, 0, Math.PI * 2);
-                    ctx.fill();
-                    break;
+            // Draw player
+            if (playerImage.complete) {
+                ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
+            } else {
+                // Fallback to circle if image not loaded
+                ctx.fillStyle = player.color;
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
             }
-        });
-
-        // Draw player
-        if (playerImage.complete) {
-            ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
-        } else {
-            // Fallback to circle if image not loaded
-            ctx.fillStyle = player.color;
-            ctx.beginPath();
-            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
-        }
 
             // Draw flashing lights
             flashingLights.forEach(light => {
@@ -775,13 +828,21 @@
             // Constrain player to the bounding box of kosteskab.gif image centered horizontally
             // Adjusted to scaled background image dimensions
             const bgX = (canvas.width - bgScaledWidth) / 2;
-            const bgY = 0; // top aligned
+            const bgY = 300; // top aligned
 
             player.x = Math.max(player.radius + bgX, Math.min(bgX + bgScaledWidth - player.radius, player.x));
-            // Limit vertical movement: player can move up 20px from bottom of bg image, down to bottom
             const bottomLimit = bgY + bgScaledHeight - player.radius;
-            const topLimit = bottomLimit - 140;
+            const topLimit = bottomLimit - 80;
             player.y = Math.max(topLimit, Math.min(bottomLimit, player.y));
+
+            const leftLimit = bgX + player.radius;
+            const rightLimit = bgX + bgScaledWidth - player.radius;
+
+            // Example: shrink horizontal band by 100px on each side
+            const restrictedLeft = leftLimit + 150;
+            const restrictedRight = rightLimit - 150;
+
+            player.x = Math.max(restrictedLeft, Math.min(restrictedRight, player.x));
 
             // Check for nearby objects
             player.nearObject = null;

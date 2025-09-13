@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+.<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -435,6 +435,14 @@
         const playerImage = new Image();
         playerImage.src = '/static/chr.png';
 
+        // Load suit image
+        const suitImage = new Image();
+        suitImage.src = '/static/suit.png';
+
+        // Load ruined suit image
+        const ruinedSuitImage = new Image();
+        ruinedSuitImage.src = '/static/suit_ruined.png';
+
         // Input handling
         const keys = {};
 
@@ -484,31 +492,20 @@
                         // Draw suit hanger
                         ctx.fillStyle = '#555577';
                         ctx.fillRect(obj.x - 5, obj.y - 20, 70, 10);
-                        
+
                         // Draw suit
                         if (obj.isSpecial && gameState.suitFallen) {
-                            // Draw fallen suit on the floor
-                            ctx.fillStyle = '#4afcff';
-                            ctx.fillRect(obj.x, 400, obj.width, 40);
-                            
-                            // Draw helmet
-                            ctx.beginPath();
-                            ctx.arc(obj.x + obj.width/2, 380, 20, 0, Math.PI * 2);
-                            ctx.fill();
+                            // Draw fallen suit on the floor using ruined image
+                            const aspect = ruinedSuitImage.naturalWidth / ruinedSuitImage.naturalHeight;
+                            const scaledWidth = aspect * 100;
+                            const drawX = obj.x + (60 - scaledWidth) / 2;
+                            ctx.drawImage(ruinedSuitImage, drawX, obj.y + 50, scaledWidth, 100);
                         } else {
                             // Draw hanging suit
-                            ctx.fillStyle = '#4afcff';
-                            ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-                            
-                            // Draw helmet
-                            ctx.beginPath();
-                            ctx.arc(obj.x + obj.width/2, obj.y - 15, 20, 0, Math.PI * 2);
-                            ctx.fill();
-                            
-                            // Draw nametag with red letter
-                            ctx.fillStyle = '#ff2c7d';
-                            ctx.font = '20px monospace';
-                            ctx.fillText(obj.letter, obj.x + obj.width/2 - 5, obj.y + obj.height/2 + 5);
+                            const aspect = suitImage.naturalWidth / suitImage.naturalHeight;
+                            const scaledWidth = aspect * 100;
+                            const drawX = obj.x + (60 - scaledWidth) / 2;
+                            ctx.drawImage(suitImage, drawX, obj.y, scaledWidth, 100);
                         }
                         break;
 
@@ -625,11 +622,11 @@
         // Release parasites from the fallen suit
         function releaseParasites() {
             const specialSuit = roomObjects.find(obj => obj.type === 'suit' && obj.isSpecial);
-            
+
             for (let i = 0; i < 8; i++) {
                 parasites.push({
                     x: specialSuit.x + specialSuit.width/2,
-                    y: 400,
+                    y: specialSuit.y + 50,
                     radius: 5 + Math.random() * 5,
                     speedX: (Math.random() - 0.5) * 2,
                     speedY: (Math.random() - 0.5) * 2
@@ -679,7 +676,7 @@ function interactWithObject(obj) {
             } else if (obj.isSpecial && !gameState.suitFallen) {
                 // Break the suit on space press
                 gameState.suitFallen = true;
-                updateTerminal("> You break the suit and it falls to the ground!");
+                updateTerminal("> You break the suit belonging to '" + obj.letter + "' and it falls to the ground!");
                 updateTerminal("> Something is moving inside it...");
                 gameState.parasitesReleased = true;
                 updateTerminal("> PARASITES emerge from the suit!");
@@ -689,17 +686,17 @@ function interactWithObject(obj) {
             }
             break;
 
-                case 'door':
-                    if (obj.direction === 'left') {
-                        updateTerminal("> You go through the left door to room 7.");
-                        window.location.href = '/7';
-                    } else if (obj.direction === 'right') {
-                        updateTerminal("> You go through the right door to room 9.");
-                        window.location.href = '/9';
-                    }
-                    break;
+        case 'door':
+            if (obj.direction === 'left') {
+                updateTerminal("> You go through the left door to room 7.");
+                window.location.href = '/7';
+            } else if (obj.direction === 'right') {
+                updateTerminal("> You go through the right door to room 9.");
+                window.location.href = '/9';
             }
+            break;
         }
+    }
 
         // Update terminal text
         function updateTerminal(text) {
