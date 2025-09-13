@@ -337,9 +337,7 @@
                 <span class="status-label">INVENTORY:</span>
                 <div id="inventory-items">Empty</div>
             </div>
-            <div class="status-item">
-                <button id="pauseButton" class="puzzle-button">Pause</button>
-            </div>
+            <!-- Removed the pause button from here -->
         </div>
 
         <div class="terminal">
@@ -531,7 +529,6 @@
         pauseResumeButton.addEventListener('click', () => {
             gameState.isPaused = !gameState.isPaused;
             pauseResumeButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
-            pauseButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
             pauseOverlay.style.display = gameState.isPaused ? 'flex' : 'none';
             saveGameState();
         });
@@ -889,20 +886,10 @@
             }, 1000);
         }
 
-        // Pause button
-        const pauseButton = document.getElementById('pauseButton');
-        pauseButton.addEventListener('click', () => {
-            gameState.isPaused = !gameState.isPaused;
-            pauseButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
-            pauseResumeButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
-            pauseOverlay.style.display = gameState.isPaused ? 'flex' : 'none';
-            saveGameState();
-        });
-
         // Initialize game
         loadGameState();
         pauseResumeButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
-        pauseButton.textContent = gameState.isPaused ? 'Resume' : 'Pause';
+        pauseOverlay.style.display = gameState.isPaused ? 'flex' : 'none';
         updateInventory();
         startTimer();
         gameLoop();

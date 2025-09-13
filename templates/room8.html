@@ -667,21 +667,27 @@
         }
 
         // Interact with objects
-        function interactWithObject(obj) {
-            switch (obj.type) {
-                case 'suit':
-                    if (obj.isSpecial && gameState.suitFallen && !gameState.letterFound) {
-                        gameState.letterFound = true;
-                        gameState.inventory.push('Letter ' + obj.letter);
-                        updateInventory();
-                        updateTerminal("> You found the letter '" + obj.letter + "' from the fallen suit!");
-                        saveGameState();
-                    } else if (!obj.isSpecial) {
-                        updateTerminal("> This suit belongs to " + obj.letter + ". Nothing unusual.");
-                    } else if (obj.isSpecial && !gameState.suitFallen) {
-                        updateTerminal("> This suit seems to be making a strange noise...");
-                    }
-                    break;
+function interactWithObject(obj) {
+    switch (obj.type) {
+        case 'suit':
+            if (obj.isSpecial && gameState.suitFallen && !gameState.letterFound) {
+                gameState.letterFound = true;
+                gameState.inventory.push('Letter ' + obj.letter);
+                updateInventory();
+                updateTerminal("> You found the letter '" + obj.letter + "' from the fallen suit!");
+                saveGameState();
+            } else if (obj.isSpecial && !gameState.suitFallen) {
+                // Break the suit on space press
+                gameState.suitFallen = true;
+                updateTerminal("> You break the suit and it falls to the ground!");
+                updateTerminal("> Something is moving inside it...");
+                gameState.parasitesReleased = true;
+                updateTerminal("> PARASITES emerge from the suit!");
+                releaseParasites();
+            } else if (!obj.isSpecial) {
+                updateTerminal("> This suit belongs to " + obj.letter + ". Nothing unusual.");
+            }
+            break;
 
                 case 'door':
                     if (obj.direction === 'left') {
