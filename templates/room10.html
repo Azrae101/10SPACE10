@@ -535,7 +535,14 @@
         // Submit code button
         submitCodeBtn.addEventListener('click', () => {
             const code = codeInput.value.toUpperCase();
-            if (code === 'EGOCENTRIC' || code === 'GEOCENTRIC') {
+            if (code === 'EGOCENTRIC') {
+                alert("How selfish... Now the parasites will land on earth.");
+                gameState.codeEntered = true;
+                updateTerminal("> Code accepted! Escape pod is now activated.");
+                codeModal.style.display = 'none';
+                saveGameState();
+            } else if (code === 'GEOCENTRIC') {
+                alert("That is nice of you. You steered the ship in another direction, so the parasites do not infect humans on earth.");
                 gameState.codeEntered = true;
                 updateTerminal("> Code accepted! Escape pod is now activated.");
                 codeModal.style.display = 'none';
