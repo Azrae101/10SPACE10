@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10 Space Station 10</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000011;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            padding: 20px;
+            background-image: url('/static/space_bg.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .title-container {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        h1 {
+            color: #4afcff;
+            text-shadow: 0 0 20px rgba(74, 252, 255, 0.7);
+            font-size: 4rem;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+        }
+
+        .subtitle {
+            color: #ff2c7d;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px rgba(255, 44, 125, 0.7);
+        }
+
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            position: relative;
+        }
+
+        .menu-button {
+            background-color: rgba(0, 20, 40, 0.8);
+            border: 2px solid #4afcff;
+            color: #4afcff;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 250px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(74, 252, 255, 0.5);
+            box-shadow: 0 0 15px rgba(74, 252, 255, 0.3);
+        }
+
+        .menu-button:hover {
+            background-color: #4afcff;
+            color: #000011;
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(74, 252, 255, 0.7);
+        }
+
+        .instructions-dropdown {
+            position: absolute;
+            top: 100%;
+            margin-top: 10px;
+            background-color: rgba(0, 20, 40, 0.95);
+            border: 2px solid #4afcff;
+            border-radius: 8px;
+            padding: 20px;
+            width: 400px;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(74, 252, 255, 0.5);
+        }
+
+        .instructions-content {
+            line-height: 1.6;
+        }
+
+        .instructions-title {
+            color: #ff2c7d;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .instruction-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .key {
+            background-color: #4afcff;
+            color: #000011;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .floating-stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .top-container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 50px;
+        }
+
+        .top-container.centered {
+            justify-content: center;
+            margin-top: 100px;
+        }
+
+        .top-container.with-instructions {
+            justify-content: space-between;
+        }
+
+        .top-container.centered .instructions-container {
+            display: none;
+        }
+
+        .top-container.with-instructions .instructions-container {
+            display: block;
+        }
+
+        .instructions-container {
+            background-color: rgba(0, 20, 40, 0.95);
+            border: 2px solid #4afcff;
+            border-radius: 8px;
+            padding: 20px;
+            width: 400px;
+            box-shadow: 0 0 20px rgba(74, 252, 255, 0.5);
+        }
+
+        .credits {
+            position: absolute;
+            bottom: 20px;
+            color: #4afcff;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-stars" id="stars"></div>
+    
+    <div class="top-container centered">
+        <div class="title-container">
+            <h1>10 SPACE STATION 10</h1>
+            <div class="subtitle">ESCAPE OR PERISH</div>
+        </div>
+        <div class="instructions-container">
+            <div class="instructions-title">GAME CONTROLS</div>
+            <div class="instructions-content">
+                <div class="instruction-item">
+                    <div class="key">W</div>
+                    <div>Move Up</div>
+                </div>
+                <div class="instruction-item">
+                    <div class="key">A</div>
+                    <div>Move Left</div>
+                </div>
+                <div class="instruction-item">
+                    <div class="key">S</div>
+                    <div>Move Down</div>
+                </div>
+                <div class="instruction-item">
+                    <div class="key">D</div>
+                    <div>Move Right</div>
+                </div>
+                <div class="instruction-item">
+                    <div class="key">SPACE</div>
+                    <div>Interact with objects</div>
+                </div>
+                <div class="instruction-item">
+                    <div class="key">ESC</div>
+                    <div>Pause game / Close menus</div>
+                </div>
+                <br>
+                <div class="instruction-item">
+                    <div>Solve puzzles to progress through the space station</div>
+                </div>
+                <div class="instruction-item">
+                    <div>Escape before time runs out!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-container">
+        <div class="menu-button" id="playButton">PLAY</div>
+        <div class="menu-button" id="instructionsButton">INSTRUCTIONS</div>
+    </div>
+    
+    <div class="credits">© 2025 Space Station Games</div>
+
+    <script>
+        // Create floating stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 5 + 's';
+                star.style.animationDuration = Math.random() * 2 + 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // Button event handlers
+        document.getElementById('playButton').addEventListener('click', function() {
+            window.location.href = '/1';
+        });
+        
+        // Toggle instructions
+        document.getElementById('instructionsButton').addEventListener('click', function() {
+            const topContainer = document.querySelector('.top-container');
+            if (topContainer.classList.contains('centered')) {
+                topContainer.classList.remove('centered');
+                topContainer.classList.add('with-instructions');
+            } else {
+                topContainer.classList.remove('with-instructions');
+                topContainer.classList.add('centered');
+            }
+        });
+        
+        // Initialize stars
+        createStars();
+    </script>
+</body>
+</html>
