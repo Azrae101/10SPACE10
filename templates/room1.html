@@ -472,15 +472,6 @@
                 width: 120,
                 height: 60,
                 interactive: true
-            },
-            {
-                type: 'flashlight',
-                x: 300,
-                y: 630,
-                width: 20,
-                height: 20,
-                interactive: true,
-                item: 'Flashlight'
             }
         ];
 
@@ -722,23 +713,6 @@
                             terminalImage.onload = () => {
                                 ctx.drawImage(terminalImage, obj.x + bgX, obj.y, obj.width, obj.height);
                             };
-                        }
-                        break;
-
-                    case 'flashlight':
-                        // Only draw if not in inventory
-                        if (!gameState.inventory.includes('Flashlight')) {
-                            // Draw flashlight body (cylinder-like)
-                            ctx.fillStyle = '#333333';
-                            ctx.fillRect(obj.x + bgX + 2, obj.y, obj.width - 4, obj.height);
-                            // Draw lens
-                            ctx.fillStyle = '#ffff00';
-                            ctx.beginPath();
-                            ctx.arc(obj.x + bgX + obj.width / 2, obj.y + obj.height / 2, 8, 0, Math.PI * 2);
-                            ctx.fill();
-                            // Draw switch
-                            ctx.fillStyle = '#666666';
-                            ctx.fillRect(obj.x + bgX + obj.width - 5, obj.y + 5, 3, 10);
                         }
                         break;
                 }
