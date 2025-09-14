@@ -430,10 +430,28 @@
 
         // Parasites
         let parasites = [];
+        let screamInterval;
 
         // Load player image
-        const playerImage = new Image();
-        playerImage.src = '/static/chr.png';
+        const playerSprites = {
+            down: ['/static/chrfront1.png','/static/chrfront2.png','/static/chrfront3.png','/static/chrfront4.png'],
+            up: ['/static/chrback1.png','/static/chrback2.png','/static/chrback3.png','/static/chrback4.png'],
+            right: ['/static/Chrfacingright1.png','/static/Chrfacingright2.png'],
+            left: ['/static/Chrfacingright1.png','/static/Chrfacingright2.png'] // will be mirrored
+        };
+
+        let playerFrames = {};
+        for (let dir in playerSprites) {
+            playerFrames[dir] = playerSprites[dir].map(src => {
+                let img = new Image();
+                img.src = src;
+                return img;
+            });
+        }
+
+        let animCounter = 0;
+        let currentFrame = 0;
+        player.direction = 'down';
 
         // Load suit image
         const suitImage = new Image();
@@ -442,6 +460,10 @@
         // Load ruined suit image
         const ruinedSuitImage = new Image();
         ruinedSuitImage.src = '/static/suit_ruined.png';
+
+        // Load parasite gif image
+        const parasiteImage = new Image();
+        parasiteImage.src = '/static/Parasite.gif';
 
         // Input handling
         const keys = {};
@@ -529,33 +551,59 @@
             // Draw parasites if released
             if (gameState.parasitesReleased) {
                 parasites.forEach(parasite => {
-                    ctx.fillStyle = '#7cb342';
-                    ctx.beginPath();
-                    ctx.arc(parasite.x, parasite.y, parasite.radius, 0, Math.PI * 2);
-                    ctx.fill();
+                    if (parasiteImage.complete) {
+                        const size = parasite.radius * 3; // scale size relative to radius
+                        ctx.drawImage(parasiteImage, parasite.x - size/2, parasite.y - size/2, size, size);
+                    } else {
+                        ctx.fillStyle = '#7cb342';
+                        ctx.beginPath();
+                        ctx.arc(parasite.x, parasite.y, parasite.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 });
             }
 
-            // Draw player
-            if (playerImage.complete) {
-                ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
+            // Draw animated player
+            let frames = playerFrames[player.direction];
+            let frame = frames[currentFrame % frames.length];
+
+            if (frame && frame.complete) {
+                if (player.direction === 'left') {
+                    ctx.save();
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(frame, -(player.x + 40), player.y - 80, 80, 160);
+                    ctx.restore();
+                } else {
+                    ctx.drawImage(frame, player.x - 40, player.y - 80, 80, 160);
+                }
             } else {
+                // Fallback placeholder
                 ctx.fillStyle = player.color;
                 ctx.beginPath();
                 ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
             }
+
         }
 
         // Update game state
         function update() {
             // Move player
-            if (keys['w'] || keys['arrowup']) player.y -= player.speed;
-            if (keys['s'] || keys['arrowdown']) player.y += player.speed;
-            if (keys['a'] || keys['arrowleft']) player.x -= player.speed;
-            if (keys['d'] || keys['arrowright']) player.x += player.speed;
+            // Move player + animate
+            let moved = false;
+            if (keys['w'] || keys['arrowup']) { player.y -= player.speed; player.direction = 'up'; moved = true; }
+            if (keys['s'] || keys['arrowdown']) { player.y += player.speed; player.direction = 'down'; moved = true; }
+            if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; player.direction = 'left'; moved = true; }
+            if (keys['d'] || keys['arrowright']) { player.x += player.speed; player.direction = 'right'; moved = true; }
+
+            if (moved) {
+                animCounter++;
+                if (animCounter % 10 === 0) {
+                    currentFrame++;
+                }
+            } else {
+                currentFrame = 0; // idle pose
+            }
 
             // Constrain player to room
             player.x = Math.max(player.radius + 30, Math.min(canvas.width - player.radius - 30, player.x));
@@ -632,6 +680,12 @@
                     speedY: (Math.random() - 0.5) * 2
                 });
             }
+            // Start screaming "R" repeatedly in the terminal
+            if (!screamInterval) {
+                screamInterval = setInterval(() => {
+                    updateTerminal("> R");
+                }, 200);
+            }
         }
 
         // Update parasite positions
@@ -691,8 +745,8 @@ function interactWithObject(obj) {
                 updateTerminal("> You go through the left door to room 7.");
                 window.location.href = '/7';
             } else if (obj.direction === 'right') {
-                updateTerminal("> You go through the right door to room 9.");
-                window.location.href = '/9';
+                updateTerminal("> You go through the right door to room 10.");
+                window.location.href = '/10';
             }
             break;
         }
@@ -785,6 +839,10 @@ function interactWithObject(obj) {
                 letterFound: false
             };
             parasites = [];
+            if (screamInterval) {
+                clearInterval(screamInterval);
+                screamInterval = null;
+            }
             localStorage.removeItem('spaceStationGameState');
             document.getElementById('gameOverModal').style.display = 'none';
             updateInventory();

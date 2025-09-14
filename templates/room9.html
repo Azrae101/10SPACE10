@@ -443,8 +443,8 @@
         const roomObjects = [
         {
             type: 'smallObject',
-            x: 550,
-            y: 650,
+            x: 450,
+            y: 900,
             width: 2,
             height: 2,
             interactive: true,
@@ -452,8 +452,8 @@
         },
         {
             type: 'door',
-            x: 550,
-            y: 740,
+            x: 450,
+            y: 950,
             width: 100,
             height: 1,
             interactive: true
@@ -476,8 +476,25 @@
         };
 
         // Load player image
-        const playerImage = new Image();
-        playerImage.src = '/static/chr.png';
+        const playerSprites = {
+            down: ['/static/chrfront1.png','/static/chrfront2.png','/static/chrfront3.png','/static/chrfront4.png'],
+            up: ['/static/chrback1.png','/static/chrback2.png','/static/chrback3.png','/static/chrback4.png'],
+            right: ['/static/Chrfacingright1.png','/static/Chrfacingright2.png'],
+            left: ['/static/Chrfacingright1.png','/static/Chrfacingright2.png'] // will be mirrored
+        };
+
+        let playerFrames = {};
+        for (let dir in playerSprites) {
+            playerFrames[dir] = playerSprites[dir].map(src => {
+                let img = new Image();
+                img.src = src;
+                return img;
+            });
+        }
+
+        let animCounter = 0;
+        let currentFrame = 0;
+        player.direction = 'down';
 
         // Input handling
         const keys = {};
@@ -486,8 +503,34 @@
             keys[e.key.toLowerCase()] = true;
 
             // Handle interaction only if not paused
-            if (e.key === ' ' && player.nearObject && !gameState.isPaused) {
-                interactWithObject(player.nearObject);
+            if (e.key === ' ' && !gameState.isPaused) {
+                // Position-based interaction
+                if (player.y < 925) {
+                    // Pick up note if not already picked
+                    if (!gameState.hasNote) {
+                        gameState.hasNote = true;
+                        gameState.inventory.push('Note with "C"');
+                        updateInventory();
+                        updateTerminal("> You picked up the mysterious note with the letter 'C'.");
+                        // Remove the note object
+                        const noteObj = roomObjects.find(obj => obj.type === 'smallObject');
+                        if (noteObj) {
+                            const index = roomObjects.indexOf(noteObj);
+                            if (index > -1) {
+                                roomObjects.splice(index, 1);
+                            }
+                        }
+                        saveGameState();
+                    } else {
+                        updateTerminal("> You've already picked up the note.");
+                    }
+                } else {
+                    // Activate door
+                    updateTerminal("> You exit the broom closet and return to the corridor.");
+                    gameState.currentRoom = 'room5';
+                    saveGameState();
+                    window.location.href = '/5';
+                }
             }
         });
 
@@ -764,16 +807,24 @@
             });
 
             // Draw player
-            if (playerImage.complete) {
-                ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
+            let frames = playerFrames[player.direction];
+            let frame = frames[currentFrame % frames.length];
+
+            if (frame && frame.complete) {
+                if (player.direction === 'left') {
+                    ctx.save();
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(frame, -(player.x + 40), player.y - 80, 80, 160);
+                    ctx.restore();
+                } else {
+                    ctx.drawImage(frame, player.x - 40, player.y - 80, 80, 160);
+                }
             } else {
-                // Fallback to circle if image not loaded
+                // Fallback placeholder
                 ctx.fillStyle = player.color;
                 ctx.beginPath();
                 ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
             }
 
             // Draw flashing lights
@@ -794,6 +845,15 @@
             if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; player.direction = 'left'; moved = true; }
             if (keys['d'] || keys['arrowright']) { player.x += player.speed; player.direction = 'right'; moved = true; }
 
+            if (moved) {
+                animCounter++;
+                if (animCounter % 10 === 0) {
+                    currentFrame++;
+                }
+            } else {
+                currentFrame = 0; // idle pose
+            }
+
             // Constrain player to the canvas
             const bgX = (canvas.width - bgScaledWidth) / 2;
             const bgY = 300; // top aligned
@@ -806,30 +866,9 @@
             const topLimit = bottomLimit - 80;
             player.y = Math.max(topLimit, Math.min(bottomLimit, player.y));
 
-            // Check for nearby objects
+            // Remove nearObject usage and interaction hint for this room
             player.nearObject = null;
-            roomObjects.forEach(obj => {
-                if (obj.interactive) {
-                    const dist = Math.sqrt(
-                        Math.pow(player.x - (obj.x + obj.width/2), 2) +
-                        Math.pow(player.y - (obj.y + obj.height/2), 2)
-                    );
-
-                    if (dist < 60) {
-                        player.nearObject = obj;
-
-                        // Position interaction hint near the object
-                        interactionHint.style.left = `${obj.x}px`;
-                        interactionHint.style.top = `${obj.y - 40}px`;
-                        interactionHint.style.opacity = '1';
-                    }
-                }
-            });
-
-            // Hide interaction hint if not near any object
-            if (!player.nearObject) {
-                interactionHint.style.opacity = '0';
-            }
+            interactionHint.style.opacity = '0';
 
             // Update timer
             updateTimer();
