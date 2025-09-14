@@ -430,6 +430,7 @@
 
         // Parasites
         let parasites = [];
+        let screamInterval;
 
         // Load player image
         const playerImage = new Image();
@@ -641,6 +642,12 @@
                     speedY: (Math.random() - 0.5) * 2
                 });
             }
+            // Start screaming "R" repeatedly in the terminal
+            if (!screamInterval) {
+                screamInterval = setInterval(() => {
+                    updateTerminal("> R");
+                }, 200);
+            }
         }
 
         // Update parasite positions
@@ -700,8 +707,8 @@ function interactWithObject(obj) {
                 updateTerminal("> You go through the left door to room 7.");
                 window.location.href = '/7';
             } else if (obj.direction === 'right') {
-                updateTerminal("> You go through the right door to room 9.");
-                window.location.href = '/9';
+                updateTerminal("> You go through the right door to room 10.");
+                window.location.href = '/10';
             }
             break;
         }
@@ -794,6 +801,10 @@ function interactWithObject(obj) {
                 letterFound: false
             };
             parasites = [];
+            if (screamInterval) {
+                clearInterval(screamInterval);
+                screamInterval = null;
+            }
             localStorage.removeItem('spaceStationGameState');
             document.getElementById('gameOverModal').style.display = 'none';
             updateInventory();
