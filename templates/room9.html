@@ -460,10 +460,6 @@
         }
         ];
 
-        // Background image scaled dimensions
-        let bgScaledWidth = 200; // default
-        let bgScaledHeight = 600; // default
-
         // Player properties
         const player = {
             x: canvas.width / 2,
@@ -474,6 +470,13 @@
             nearObject: null,
             direction: 'down'
         };
+
+        const roomBounds = {
+            x0: 270,
+            x1: 730,
+            y0: 820,
+            y1: 960,
+        }
 
         // Load player image
         const playerImage = new Image();
@@ -616,39 +619,11 @@
         // Draw the room (broom closet)
         function drawRoom() {
             // Set background img position and size
-            if (!bgLoaded) {
-                if (bgImage.complete) {
-                    // Get actual rendered canvas dimensions
-                    const rect = canvas.getBoundingClientRect();
-                    const renderedWidth = rect.width;
-                    const renderedHeight = rect.height;
-                    // Calculate scale to make image height equal to rendered canvas height, keep aspect ratio
-                    const scale = renderedHeight / bgImage.naturalHeight;
-                    bgScaledWidth = bgImage.naturalWidth * scale;
-                    bgScaledHeight = renderedHeight;
-                    // Calculate x to center the image horizontally
-                    const x = (renderedWidth - bgScaledWidth) / 2;
-                    bgImage.style.left = x + 'px';
-                    bgImage.style.width = bgScaledWidth + 'px';
-                    bgImage.style.height = bgScaledHeight + 'px';
-                    // Position player at bottom of background image, moved down 100px
-                    player.y = bgScaledHeight - 200;
-                    bgLoaded = true;
-                } else {
-                    bgImage.onload = () => {
-                        const rect = canvas.getBoundingClientRect();
-                        const renderedWidth = rect.width;
-                        const renderedHeight = rect.height;
-                        const scale = renderedHeight / bgImage.naturalHeight;
-                        bgScaledWidth = bgImage.naturalWidth * scale;
-                        bgScaledHeight = renderedHeight;
-                        const x = (renderedWidth - bgScaledWidth) / 2;
-                        bgImage.style.left = x + 'px';
-                        bgImage.style.width = bgScaledWidth + 'px';
-                        bgImage.style.height = bgScaledHeight + 'px';
-                        bgLoaded = true;
-                    };
-                }
+            if (bgImage.complete) {
+                bgImage.style.left = '0px';
+                bgImage.style.top = '0px';
+                bgImage.style.width = '1000px'
+                bgImage.style.height = '100%';
             }
 
             // Clear canvas
@@ -794,17 +769,9 @@
             if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; player.direction = 'left'; moved = true; }
             if (keys['d'] || keys['arrowright']) { player.x += player.speed; player.direction = 'right'; moved = true; }
 
-            // Constrain player to the canvas
-            const bgX = (canvas.width - bgScaledWidth) / 2;
-            const bgY = 300; // top aligned
-
-            const leftLimit = bgX + player.radius;
-            const rightLimit = bgX + bgScaledWidth - player.radius;
-            player.x = Math.max(leftLimit, Math.min(rightLimit, player.x));
-
-            const bottomLimit = canvas.height - player.radius - 10;
-            const topLimit = bottomLimit - 80;
-            player.y = Math.max(topLimit, Math.min(bottomLimit, player.y));
+            // Constrain player to room
+            player.x = Math.max(roomBounds.x0 + player.radius + 30, Math.min(roomBounds.x1 - player.radius - 30, player.x));
+            player.y = Math.max(roomBounds.y0 + player.radius + 30, Math.min(roomBounds.y1 - player.radius - 30, player.y));
 
             // Check for nearby objects
             player.nearObject = null;
