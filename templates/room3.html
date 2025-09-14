@@ -319,7 +319,7 @@
             </div>
             <div class="status-item">
                 <span class="status-label">ROOM:</span>
-                <span id="room-name">Library</span>
+                <span id="room-name">Sleeping Quarters</span>
             </div>
             <div class="status-item">
                 <span class="status-label">INVENTORY:</span>
@@ -470,6 +470,55 @@
                 height: 60,
                 interactive: true,
                 locked: true
+            },
+            // Beds on the right side (6 beds arranged)
+            {
+                type: 'bed',
+                x: 900,
+                y: 100,
+                width: 80,
+                height: 120,
+                interactive: true
+            },
+            {
+                type: 'bed',
+                x: 900,
+                y: 250,
+                width: 80,
+                height: 120,
+                interactive: true
+            },
+            {
+                type: 'bed',
+                x: 900,
+                y: 400,
+                width: 80,
+                height: 120,
+                interactive: true
+            },
+            {
+                type: 'bed',
+                x: 1000,
+                y: 100,
+                width: 80,
+                height: 120,
+                interactive: true
+            },
+            {
+                type: 'bed',
+                x: 1000,
+                y: 250,
+                width: 80,
+                height: 120,
+                interactive: true
+            },
+            {
+                type: 'bed',
+                x: 1000,
+                y: 400,
+                width: 80,
+                height: 120,
+                interactive: true
             }
         ];
 
@@ -613,7 +662,14 @@
 
                     case 'door':
                         if (doorImage.complete) {
-                            ctx.drawImage(doorImage, obj.x, obj.y, obj.width, obj.height);
+                            if (obj.direction === 'left') {
+                                ctx.save();
+                                ctx.scale(-1, 1);
+                                ctx.drawImage(doorImage, -obj.x - obj.width, obj.y, obj.width, obj.height);
+                                ctx.restore();
+                            } else {
+                                ctx.drawImage(doorImage, obj.x, obj.y, obj.width, obj.height);
+                            }
                         } else {
                             // Fallback to rectangle if image not loaded
                             ctx.fillStyle = '#222244';
@@ -663,6 +719,24 @@
                             ctx.lineTo(obj.x + obj.width - 5, obj.y + 10 + i * 10);
                             ctx.stroke();
                         }
+                        break;
+
+                    case 'bed':
+                        // Draw pillow (top, white)
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(obj.x + 10, obj.y, obj.width - 20, 10);
+
+                        // Draw headboard (red)
+                        ctx.fillStyle = '#cd5c5c';
+                        ctx.fillRect(obj.x, obj.y + 10, obj.width, dsa20);
+
+                        // Draw mattress (red)
+                        ctx.fillStyle = '#cd5c5c';
+                        ctx.fillRect(obj.x + 5, obj.y + 30, obj.width - 10, 60);
+
+                        // Draw footboard (red)
+                        ctx.fillStyle = '#cd5c5c';
+                        ctx.fillRect(obj.x, obj.y + 90, obj.width, 30);
                         break;
                 }
             });
@@ -789,6 +863,10 @@
                     } else {
                         updateTerminal("> The vent is already open.");
                     }
+                    break;
+
+                case 'bed':
+                    updateTerminal("> You can't sleep right now");
                     break;
             }
         }
