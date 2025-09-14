@@ -323,7 +323,7 @@
             </div>
             <div class="status-item">
                 <span class="status-label">ROOM:</span>
-                <span id="room-name">Engine Room</span>
+                <span id="room-name">Lab Room</span>
             </div>
             <div class="status-item">
                 <span class="status-label">INVENTORY:</span>
@@ -333,8 +333,8 @@
 
         <div class="terminal">
             <div id="terminal-content">
-                > You are in the engine room of Space Station Omega.<br>
-                > You see a pile of spacesuits in the corner. You should investigate.
+                > You are in the lab room of Space Station Omega.<br>
+                > You stand in a corridor consumed by darkness. Have you brought a light?
             </div>
         </div>
     </div>
@@ -411,7 +411,8 @@
             radius: 15,
             color: '#4afcff',
             speed: 5,
-            nearObject: null
+            nearObject: null,
+            direction: 'right'
         };
 
         // Camera properties, for scrolling rooms and shake effects
@@ -620,16 +621,30 @@
 
             // Draw darkness
             // ctx.drawImage(darkImage, player.x - 1536, player.y - 1152, 3072, 2304)
-            ctx.drawImage(darkFlashlightImage, player.x - 1536, player.y - 1152, 3072, 2304)
+
+            // ctx.translate(player.x - 1536, player.y - 1152)
+            ctx.translate(player.x, player.y)
+            if (player.direction === 'right') {
+                ctx.drawImage(darkFlashlightImage, -1536, -1152, 3072, 2304)
+            } else if (player.direction === 'up') {
+                ctx.rotate(-Math.PI / 2)
+                ctx.drawImage(darkFlashlightImage, -1536, -1152, 3072, 2304)
+            } else if (player.direction === 'left') {
+                ctx.rotate(Math.PI)
+                ctx.drawImage(darkFlashlightImage, -1536, -1152, 3072, 2304)
+            } else {
+                ctx.rotate(Math.PI / 2)
+                ctx.drawImage(darkFlashlightImage, -1536, -1152, 3072, 2304)
+            }
         }
 
         // Update game state
         function update() {
             // Move player
-            if (keys['w'] || keys['arrowup']) player.y -= player.speed;
-            if (keys['s'] || keys['arrowdown']) player.y += player.speed;
-            if (keys['a'] || keys['arrowleft']) player.x -= player.speed;
-            if (keys['d'] || keys['arrowright']) player.x += player.speed;
+            if (keys['w'] || keys['arrowup']) { player.y -= player.speed; player.direction = 'up'; }
+            if (keys['s'] || keys['arrowdown']) { player.y += player.speed; player.direction = 'down'; }
+            if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; player.direction = 'left'; }
+            if (keys['d'] || keys['arrowright']) { player.x += player.speed; player.direction = 'right'; }
 
             // Constrain player to room
             player.x = Math.max(roomBounds.x0 + player.radius + 30, Math.min(roomBounds.x1 - player.radius - 30, player.x));

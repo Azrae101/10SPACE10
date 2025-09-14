@@ -430,6 +430,7 @@
 
         // Parasites
         let parasites = [];
+        let screamInterval;
 
         // Load player image
         const playerImage = new Image();
@@ -442,6 +443,10 @@
         // Load ruined suit image
         const ruinedSuitImage = new Image();
         ruinedSuitImage.src = '/static/suit_ruined.png';
+
+        // Load parasite gif image
+        const parasiteImage = new Image();
+        parasiteImage.src = '/static/Parasite.gif';
 
         // Input handling
         const keys = {};
@@ -529,10 +534,15 @@
             // Draw parasites if released
             if (gameState.parasitesReleased) {
                 parasites.forEach(parasite => {
-                    ctx.fillStyle = '#7cb342';
-                    ctx.beginPath();
-                    ctx.arc(parasite.x, parasite.y, parasite.radius, 0, Math.PI * 2);
-                    ctx.fill();
+                    if (parasiteImage.complete) {
+                        const size = parasite.radius * 3; // scale size relative to radius
+                        ctx.drawImage(parasiteImage, parasite.x - size/2, parasite.y - size/2, size, size);
+                    } else {
+                        ctx.fillStyle = '#7cb342';
+                        ctx.beginPath();
+                        ctx.arc(parasite.x, parasite.y, parasite.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 });
             }
 
@@ -632,6 +642,12 @@
                     speedY: (Math.random() - 0.5) * 2
                 });
             }
+            // Start screaming "R" repeatedly in the terminal
+            if (!screamInterval) {
+                screamInterval = setInterval(() => {
+                    updateTerminal("> R");
+                }, 200);
+            }
         }
 
         // Update parasite positions
@@ -691,8 +707,8 @@ function interactWithObject(obj) {
                 updateTerminal("> You go through the left door to room 7.");
                 window.location.href = '/7';
             } else if (obj.direction === 'right') {
-                updateTerminal("> You go through the right door to room 9.");
-                window.location.href = '/9';
+                updateTerminal("> You go through the right door to room 10.");
+                window.location.href = '/10';
             }
             break;
         }
@@ -785,6 +801,10 @@ function interactWithObject(obj) {
                 letterFound: false
             };
             parasites = [];
+            if (screamInterval) {
+                clearInterval(screamInterval);
+                screamInterval = null;
+            }
             localStorage.removeItem('spaceStationGameState');
             document.getElementById('gameOverModal').style.display = 'none';
             updateInventory();

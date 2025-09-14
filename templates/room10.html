@@ -253,6 +253,26 @@
             text-align: center;
         }
 
+        .ending-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 160;
+            display: none;
+        }
+
+        .ending-image {
+            max-width: 80%;
+            max-height: 80%;
+            transform: scale(3);
+        }
+
         .settings-button {
             position: absolute;
             top: 10px;
@@ -363,6 +383,10 @@
         <div id="pauseOverlay" class="pause-overlay">
             <h1 class="pause-title">PAUSED</h1>
         </div>
+
+        <div id="endingOverlay" class="ending-overlay">
+            <img id="endingImage" class="ending-image" src="" />
+        </div>
     </div>
 
     <button id="settingsButton" class="settings-button">⚙️</button>
@@ -460,12 +484,11 @@
             },
             {
                 type: 'door',
-                x: 700,  // Adjusted position
-                y: 400,  // Adjusted position
-                width: 80,
-                height: 160,
-                interactive: true,
-                locked: true
+                x: 500,  // Position near bottom
+                y: 700,  // Near player spawn
+                width: 200,
+                height: 5,
+                interactive: true
             }
         ];
 
@@ -523,17 +546,25 @@
         // Submit code button
         submitCodeBtn.addEventListener('click', () => {
             const code = codeInput.value.toUpperCase();
+            const endingOverlay = document.getElementById('endingOverlay');
+            const endingImage = document.getElementById('endingImage');
             if (code === 'EGOCENTRIC') {
                 alert("How selfish... Now the parasites will land on earth.");
                 gameState.codeEntered = true;
                 updateTerminal("> Code accepted! Escape pod is now activated.");
                 codeModal.style.display = 'none';
+                // Show Bad.gif
+                endingImage.src = '/static/Bad.gif';
+                endingOverlay.style.display = 'flex';
                 saveGameState();
             } else if (code === 'GEOCENTRIC') {
                 alert("That is nice of you. You steered the ship in another direction, so the parasites do not infect humans on earth.");
                 gameState.codeEntered = true;
                 updateTerminal("> Code accepted! Escape pod is now activated.");
                 codeModal.style.display = 'none';
+                // Show Good.gif
+                endingImage.src = '/static/Good.gif';
+                endingOverlay.style.display = 'flex';
                 saveGameState();
             } else {
                 updateTerminal("> Invalid code. Try again.");
@@ -649,18 +680,8 @@
                         break;
                         
                     case 'door':
-                        ctx.fillStyle = gameState.codeEntered ? '#4a5d2a' : '#2a201b';
+                        ctx.fillStyle = '#000000';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-
-                        // Draw door details
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(obj.x + 10, obj.y + 20, 5, 120);
-                        ctx.fillRect(obj.x + obj.width - 15, obj.y + 20, 5, 120);
-
-                        // Draw door label
-                        ctx.fillStyle = '#fff';
-                        ctx.font = '14px Arial';
-                        ctx.fillText("ESCAPE POD", obj.x + 15, obj.y + 100);
                         break;
                 }
             });
@@ -701,7 +722,7 @@
             const bgY = 0;
 
             const bottomLimit = bgY + bgScaledHeight - player.radius + 270; // allow going far down
-            const topLimit = bottomLimit - 200; // only allow 200px of vertical range
+            const topLimit = bgY + player.radius + 50; // allow moving much more up, 50px from top of bg
 
             player.x = Math.max(
                 player.radius + bgX + 90,                             
@@ -769,17 +790,7 @@
                     break;
 
                 case 'door':
-                    if (gameState.codeEntered) {
-                        updateTerminal("> The escape pod is activated! You can now escape!");
-                        // Transition to victory screen or next level
-                        setTimeout(() => {
-                            alert("Congratulations! You've escaped the space station!");
-                            localStorage.removeItem('spaceStationGameState');
-                            window.location.href = '/1';
-                        }, 2000);
-                    } else {
-                        updateTerminal("> The escape pod is locked. You need to activate it from the control console first.");
-                    }
+                    window.location.href = '/8';
                     break;
             }
         }
