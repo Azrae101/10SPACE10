@@ -456,7 +456,7 @@
                 <div class="pipe corner" data-rotation="0" data-type="corner"></div>
                 <div class="pipe corner" data-rotation="0" data-type="corner"></div>
                 <div class="pipe corner" data-rotation="0" data-type="corner"></div>
-                <div class="pipe vertical" data-rotation="0" data-type="vertical"></div>
+                <div class="pipe" data-rotation="0" data-type="vertical"></div>
             </div>
             <div id="pipeFeedback"></div>
             <button class="puzzle-button" id="checkPipes">Check Solution</button>
@@ -506,11 +506,6 @@
     <div id="settingsDropdown" class="settings-dropdown">
         <button id="pauseResumeButton" class="settings-option">Pause</button>
         <button id="settingsRestartButton" class="settings-option">Restart</button>
-        <button id="room3Button" class="settings-option">Room 3</button>
-        <button id="room6Button" class="settings-option">Room 6</button>
-        <button id="room7Button" class="settings-option">Room 7</button>
-        <button id="room8Button" class="settings-option">Room 8</button>
-        <button id="room9Button" class="settings-option">Room 9</button>
     </div>
 
     <div class="ui-container">
@@ -653,7 +648,6 @@
             right: ['/static/chrfacingright1.png','/static/chrfacingright2.png'],
             left: ['/static/chrfacingright1.png','/static/chrfacingright2.png'] // will be mirrored
         };
-
 
         let playerFrames = {};
         for (let dir in playerSprites) {
@@ -1148,19 +1142,22 @@
             const wireContainer = document.getElementById('wire-connections');
             wireContainer.innerHTML = '';
             
+            const wirePuzzle = document.querySelector('.wire-puzzle');
+            const wirePuzzleRect = wirePuzzle.getBoundingClientRect();
+            
             gameState.wireConnections.forEach(conn => {
-                const leftNode = document.querySelector(`.wire-node[data-id="${conn.leftId}"]`);
-                const rightNode = document.querySelector(`.wire-node[data-id="${conn.rightId}"]`);
+                const leftNode = document.querySelector(`.wire-node.left[data-id="${conn.leftId}"]`);
+                const rightNode = document.querySelector(`.wire-node.right[data-id="${conn.rightId}"]`);
                 
                 if (leftNode && rightNode) {
                     const leftRect = leftNode.getBoundingClientRect();
                     const rightRect = rightNode.getBoundingClientRect();
-                    const containerRect = wireContainer.parentElement.getBoundingClientRect();
                     
-                    const leftX = leftRect.left + leftRect.width - containerRect.left;
-                    const leftY = leftRect.top + leftRect.height/2 - containerRect.top;
-                    const rightX = rightRect.left - containerRect.left;
-                    const rightY = rightRect.top + rightRect.height/2 - containerRect.top;
+                    // Calculate positions relative to the wire puzzle container
+                    const leftX = leftRect.right - wirePuzzleRect.left;
+                    const leftY = leftRect.top + leftRect.height/2 - wirePuzzleRect.top;
+                    const rightX = rightRect.left - wirePuzzleRect.left;
+                    const rightY = rightRect.top + rightRect.height/2 - wirePuzzleRect.top;
                     
                     const distance = Math.sqrt(Math.pow(rightX - leftX, 2) + Math.pow(rightY - leftY, 2));
                     const angle = Math.atan2(rightY - leftY, rightX - leftX) * 180 / Math.PI;
@@ -1186,19 +1183,28 @@
         }
         
         function checkWireSolution() {
-            // For this implementation, we'll approve any solution
-            document.getElementById('wireFeedback').textContent = "Wire connections verified! Power is restored.";
-            document.getElementById('wireFeedback').style.color = '#7cb342';
-            gameState.wirePuzzleSolved = true;
-            setTimeout(() => {
-                wirePuzzleModal.style.display = 'none';
-                updateTerminal("> Wire connections verified! Power is restored.");
-                saveGameState();
-                
-                if (gameState.pipePuzzleSolved) {
-                    updateTerminal("> Both puzzles solved! You can now activate the safety switch.");
-                }
-            }, 1500);
+            // Check if all connections are correct (matching colors)
+            const allCorrect = gameState.wireConnections.every(conn => 
+                conn.leftColor === conn.rightColor
+            );
+            
+            if (allCorrect && gameState.wireConnections.length === 4) {
+                document.getElementById('wireFeedback').textContent = "Wire connections verified! Power is restored.";
+                document.getElementById('wireFeedback').style.color = '#7cb342';
+                gameState.wirePuzzleSolved = true;
+                setTimeout(() => {
+                    wirePuzzleModal.style.display = 'none';
+                    updateTerminal("> Wire connections verified! Power is restored.");
+                    saveGameState();
+                    
+                    if (gameState.pipePuzzleSolved) {
+                        updateTerminal("> Both puzzles solved! You can now activate the safety switch.");
+                    }
+                }, 1500);
+            } else {
+                document.getElementById('wireFeedback').textContent = "Incorrect connections. Please try again.";
+                document.getElementById('wireFeedback').style.color = '#ff2c7d';
+            }
         }
 
         // Timer countdown
@@ -1247,11 +1253,6 @@
         const settingsDropdown = document.getElementById('settingsDropdown');
         const pauseResumeButton = document.getElementById('pauseResumeButton');
         const settingsRestartButton = document.getElementById('settingsRestartButton');
-        const room3Button = document.getElementById('room3Button');
-        const room6Button = document.getElementById('room6Button');
-        const room7Button = document.getElementById('room7Button');
-        const room8Button = document.getElementById('room8Button');
-        const room9Button = document.getElementById('room9Button');
 
         settingsButton.addEventListener('click', () => {
             settingsDropdown.style.display = settingsDropdown.style.display === 'flex' ? 'none' : 'flex';
@@ -1268,26 +1269,6 @@
         settingsRestartButton.addEventListener('click', () => {
             localStorage.removeItem('spaceStationGameState');
             window.location.href = '/1';
-        });
-
-        room3Button.addEventListener('click', () => {
-            window.location.href = '/3';
-        });
-
-        room6Button.addEventListener('click', () => {
-            window.location.href = '/6';
-        });
-
-        room7Button.addEventListener('click', () => {
-            window.location.href = '/7';
-        });
-
-        room8Button.addEventListener('click', () => {
-            window.location.href = '/8';
-        });
-
-        room9Button.addEventListener('click', () => {
-            window.location.href = '/9';
         });
 
         // Restart game
