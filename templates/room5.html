@@ -377,7 +377,47 @@
                 width: 80,
                 height: 80,
                 interactive: true,
-            }
+            },
+            {
+                type: 'door_back',
+                x: 20,
+                y: 380, // Moved to bottom
+                width: 120,
+                height: 300,
+                interactive: true
+            },
+            {
+                type: 'door_6',
+                x: 960,
+                y: 320, // Moved to bottom
+                width: 180,
+                height: 280,
+                interactive: true
+            },
+            {
+                type: 'door_7',
+                x: 5140,
+                y: 380, // Moved to bottom
+                width: 120,
+                height: 300,
+                interactive: true
+            },
+            {
+                type: 'door_9',
+                x: 3120,
+                y: 320, // Moved to bottom
+                width: 180,
+                height: 280,
+                interactive: true
+            },
+            {
+                type: 'i',
+                x: 1960,
+                y: 290,
+                width: 20,
+                height: 40,
+                interactive: false,
+            },
         ];
 
         // Player properties
@@ -423,6 +463,16 @@
 
         const bgImage = new Image(600, 4200);
         bgImage.src = '/static/bg_room_5.png'
+
+        const sideDoorImage = new Image();
+        sideDoorImage.src = '/static/side_door.png'
+
+        const doorImage = new Image();
+        doorImage.src = '/static/door.png'
+
+        const iImage = new Image();
+        iImage.src = '/static/i.png'
+        
 
         // const darkImage = new Image();
         // darkImage.src = '/static/dark.png';
@@ -515,20 +565,23 @@
                         }
                         break;
 
-                    case 'door':
-                        ctx.fillStyle = gameState.doorUnlocked ? '#4a5d2a' : '#2a201b';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-
-                        // Draw door details
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(obj.x + 10, obj.y + 20, 5, 120); // Door frame
-                        ctx.fillRect(obj.x + obj.width - 15, obj.y + 20, 5, 120); // Door frame
-
-                        // Draw door handle
-                        ctx.fillStyle = '#fffc00';
-                        ctx.beginPath();
-                        ctx.arc(obj.x + 60, obj.y + obj.height/2, 8, 0, Math.PI * 2);
-                        ctx.fill();
+                    case 'door_back':
+                        ctx.scale(-1, 1)
+                        ctx.drawImage(sideDoorImage, obj.x - obj.width, obj.y, obj.width, obj.height);
+                        ctx.scale(-1, 1)
+                        break;
+                    
+                    case 'i':
+                        ctx.drawImage(iImage, obj.x, obj.y, obj.width, obj.height);
+                        break;
+                    
+                    case 'door_6':
+                    case 'door_9':
+                        ctx.drawImage(doorImage, obj.x, obj.y, obj.width, obj.height);
+                        break;
+                    
+                    case 'door_7':
+                        ctx.drawImage(sideDoorImage, obj.x, obj.y, obj.width, obj.height);
                         break;
 
                     case 'equipment':
@@ -683,23 +736,35 @@
                     }
                     break;
 
-                case 'door':
-                    if (obj.locked) {
-                        if (gameState.hasKey) {
-                            obj.locked = false;
-                            gameState.doorUnlocked = true;
-                            updateTerminal("> You used the Access Key to unlock the door!");
-                            saveGameState();
-                        } else {
-                            updateTerminal("> The door is locked. You need an Access Key.");
-                        }
-                    } else {
-                        updateTerminal("> The door is unlocked. You can proceed to the next room.");
-                        // Transition to next room
-                        gameState.currentRoom = 'room2';
-                        saveGameState();
-                        window.location.href = '/room2';
+                case 'door_back':
+                    updateTerminal("> Going back to the previous room.");
+                    gameState.currentRoom = 'room4';
+                    saveGameState();
+                    window.location.href = '/4';
+                    break;
+                
+                case 'door_6':
+                    updateTerminal("> Going to the bathroom")
+                    gameState.currentroom = 'room6';
+                    saveGameState();
+                    window.location.href = '/6'
+                    break;
+                
+                case 'door_7':
+                    updateTerminal("> Going to engineering room.");
+                    gameState.currentRoom = 'room7';
+                    if (!gameState.wireConnections) {
+                        gameState.wireConnections = []
                     }
+                    saveGameState();
+                    window.location.href = '/7';
+                    break;
+
+                case 'door_9':
+                    updateTerminal("> Going to the broom closet")
+                    gameState.currentroom = 'room9';
+                    saveGameState();
+                    window.location.href = '/9'
                     break;
 
                 case 'console':
@@ -751,7 +816,7 @@
         }
 
         // Initialize game
-        // loadGameState();
+        loadGameState();
         updateInventory();
         startTimer();
         gameLoop();

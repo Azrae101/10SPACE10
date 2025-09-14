@@ -395,9 +395,14 @@
         const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
 
+        const sideDoorImage = new Image();
+        sideDoorImage.src = '/static/side_door.png'
+
+        const oImage = new Image();
+        oImage.src=  '/static/o.png'
+
         // Background image element
         const bgImage = document.getElementById('bgImage');
-        let bgLoaded = false;
 
         // Room layout and objects
         const roomObjects = [
@@ -426,6 +431,30 @@
                 width: 120,
                 height: 120,
                 interactive: true,
+            },
+            {
+                type: 'door_back',
+                x: 200,
+                y: 440, // Moved to bottom
+                width: 120,
+                height: 300,
+                interactive: true
+            },
+            {
+                type: 'door_5',
+                x: 880,
+                y: 440, // Moved to bottom
+                width: 120,
+                height: 300,
+                interactive: true
+            },
+            {
+                type: 'o',
+                x: 360,
+                y: 290,
+                width: 30,
+                height: 40,
+                interactive: false,
             }
         ];
 
@@ -457,8 +486,8 @@
         }
 
         const roomBounds = {
-            x0: 350,
-            x1: 850,
+            x0: 250,
+            x1: 950,
             y0: 410,
             y1: 680,
         }
@@ -532,66 +561,13 @@
             camY += 4 * Math.sin(2.6234 * gameTime)
             ctx.translate(-camX, -camY)
 
-            // // Draw background (space station floor)
-            // ctx.fillStyle = '#222244';
-            // ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // // Draw floor tiles (pixel art)
-            // for (let x = 0; x < canvas.width; x += 40) {
-            //     for (let y = 0; y < canvas.height; y += 40) {
-            //         // Alternate tile colors for pattern
-            //         const isAlt = ((x / 40) + (y / 40)) % 2 === 0;
-            //         ctx.fillStyle = isAlt ? '#333355' : '#2a2a44';
-            //         ctx.fillRect(x, y, 40, 40);
-            //         // Add pixel art details
-            //         ctx.fillStyle = '#444466';
-            //         ctx.fillRect(x + 2, y + 2, 36, 36);
-            //         ctx.fillStyle = '#3a3a55';
-            //         ctx.fillRect(x + 5, y + 5, 30, 30);
-            //     }
-            // }
-
-            // // Draw walls
-            // ctx.fillStyle = '#808080';
-            // ctx.fillRect(0, 0, canvas.width, 30);
-            // ctx.fillRect(0, 0, 30, canvas.height);
-            // ctx.fillRect(canvas.width - 30, 0, 30, canvas.height);
-            // ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
-
             // Set background img position and size
-            // if (!bgLoaded) {
-                if (bgImage.complete) {
-                    // Get actual rendered canvas dimensions
-                    const rect = canvas.getBoundingClientRect();
-                    const renderedWidth = rect.width;
-                    const renderedHeight = rect.height;
-                    // Calculate scale to make image height equal to rendered canvas height, keep aspect ratio
-                    const scale = renderedHeight / bgImage.naturalHeight;
-                    bgScaledWidth = bgImage.naturalWidth * scale;
-                    bgScaledHeight = renderedHeight;
-                    // Calculate x to center the image horizontally
-                    const x = (renderedWidth - bgScaledWidth) / 2;
-                    bgImage.style.left = (x - camX) + 'px';
-                    bgImage.style.top = (-camY) + 'px';
-                    bgImage.style.width = bgScaledWidth + 'px';
-                    bgImage.style.height = bgScaledHeight + 'px';
-                    bgLoaded = true;
-                } else {
-                    bgImage.onload = () => {
-                        const rect = canvas.getBoundingClientRect();
-                        const renderedWidth = rect.width;
-                        const renderedHeight = rect.height;
-                        const scale = renderedHeight / bgImage.naturalHeight;
-                        bgScaledWidth = bgImage.naturalWidth * scale;
-                        bgScaledHeight = renderedHeight;
-                        const x = (renderedWidth - bgScaledWidth) / 2;
-                        bgImage.style.left = x + 'px';
-                        bgImage.style.width = bgScaledWidth + 'px';
-                        bgImage.style.height = bgScaledHeight + 'px';
-                        bgLoaded = true;
-                    };
-                }
-            // }
+            if (bgImage.complete) {
+                bgImage.style.left = (225 - camX) + 'px';
+                bgImage.style.top = (-camY) + 'px';
+                bgImage.style.width = '750px'
+                bgImage.style.height = '100%';
+            }
 
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -599,19 +575,16 @@
             // Draw objects
             roomObjects.forEach(obj => {
                 switch (obj.type) {
-                    case 'pile_of_suits':
-                        ctx.fillStyle = '#444466';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                    case 'door_back':
+                        ctx.scale(-1, 1)
+                        ctx.drawImage(sideDoorImage, -obj.x - obj.width, obj.y, obj.width, obj.height);
+                        ctx.scale(-1, 1)
                         break;
-
-                    case 'fuel_tank':
-                        ctx.fillStyle = '#556666';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                    case 'door_5':
+                        ctx.drawImage(sideDoorImage, obj.x, obj.y, obj.width, obj.height);
                         break;
-
-                    case 'o2_cabinet':
-                        ctx.fillStyle = '#885555';
-                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                    case 'o':
+                        ctx.drawImage(oImage, obj.x, obj.y, obj.width, obj.height);
                         break;
                 }
             });
@@ -728,6 +701,20 @@
                 
                 case 'o2_cabinet':
                     updateTerminal("> You find spare oxygen tanks in the cabinet.")
+                    break;
+                
+                case 'door_back':
+                    updateTerminal("> Going to the library")
+                    gameState.currentroom = 'room3';
+                    saveGameState();
+                    window.location.href = '/3'
+                    break;
+
+                case 'door_5':
+                    updateTerminal("> Going to the lab room")
+                    gameState.currentroom = 'room5';
+                    saveGameState();
+                    window.location.href = '/5'
                     break;
             }
         }

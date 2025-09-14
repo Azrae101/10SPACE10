@@ -460,10 +460,6 @@
         }
         ];
 
-        // Background image scaled dimensions
-        let bgScaledWidth = 200; // default
-        let bgScaledHeight = 600; // default
-
         // Player properties
         const player = {
             x: canvas.width / 2,
@@ -474,6 +470,13 @@
             nearObject: null,
             direction: 'down'
         };
+
+        const roomBounds = {
+            x0: 270,
+            x1: 730,
+            y0: 820,
+            y1: 1020,
+        }
 
         // Load player image
         const playerSprites = {
@@ -659,39 +662,11 @@
         // Draw the room (broom closet)
         function drawRoom() {
             // Set background img position and size
-            if (!bgLoaded) {
-                if (bgImage.complete) {
-                    // Get actual rendered canvas dimensions
-                    const rect = canvas.getBoundingClientRect();
-                    const renderedWidth = rect.width;
-                    const renderedHeight = rect.height;
-                    // Calculate scale to make image height equal to rendered canvas height, keep aspect ratio
-                    const scale = renderedHeight / bgImage.naturalHeight;
-                    bgScaledWidth = bgImage.naturalWidth * scale;
-                    bgScaledHeight = renderedHeight;
-                    // Calculate x to center the image horizontally
-                    const x = (renderedWidth - bgScaledWidth) / 2;
-                    bgImage.style.left = x + 'px';
-                    bgImage.style.width = bgScaledWidth + 'px';
-                    bgImage.style.height = bgScaledHeight + 'px';
-                    // Position player at bottom of background image, moved down 100px
-                    player.y = bgScaledHeight - 200;
-                    bgLoaded = true;
-                } else {
-                    bgImage.onload = () => {
-                        const rect = canvas.getBoundingClientRect();
-                        const renderedWidth = rect.width;
-                        const renderedHeight = rect.height;
-                        const scale = renderedHeight / bgImage.naturalHeight;
-                        bgScaledWidth = bgImage.naturalWidth * scale;
-                        bgScaledHeight = renderedHeight;
-                        const x = (renderedWidth - bgScaledWidth) / 2;
-                        bgImage.style.left = x + 'px';
-                        bgImage.style.width = bgScaledWidth + 'px';
-                        bgImage.style.height = bgScaledHeight + 'px';
-                        bgLoaded = true;
-                    };
-                }
+            if (bgImage.complete) {
+                bgImage.style.left = '0px';
+                bgImage.style.top = '0px';
+                bgImage.style.width = '1000px'
+                bgImage.style.height = '100%';
             }
 
             // Clear canvas

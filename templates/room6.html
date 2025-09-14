@@ -393,6 +393,12 @@
         const bgOpenImage = new Image();
         bgOpenImage.src = '/static/bathroom_open.png'
 
+        const sideDoorImage = new Image();
+        sideDoorImage.src = '/static/side_door.png'
+
+        const eImage = new Image();
+        eImage.src = '/static/e.png'
+
         // Room layout and objects
         const roomObjects = [
             {
@@ -402,6 +408,22 @@
                 width: 80,
                 height: 80,
                 interactive: true,
+            },
+            {
+                type: 'door_back',
+                x: 380,
+                y: 480, // Moved to bottom
+                width: 120,
+                height: 300,
+                interactive: true
+            },
+            {
+                type: 'e',
+                x: 590,
+                y: 620,
+                width: 30,
+                height: 40,
+                interactive: false,
             }
         ];
 
@@ -503,6 +525,23 @@
                 }
             }
 
+            // Draw objects
+            roomObjects.forEach(obj => {
+                switch (obj.type) {
+                    case 'door_back':
+                        ctx.scale(-1, 1)
+                        ctx.drawImage(sideDoorImage, -obj.x - obj.width, obj.y, obj.width, obj.height);
+                        ctx.scale(-1, 1)
+                        break;
+                    case 'e':
+                        if (!gameState.toiletLidOpen) {
+                            ctx.drawImage(eImage, obj.x, obj.y, obj.width, obj.height);
+                        }
+                        break;
+                    
+                }
+            });
+
             // Draw player
             if (playerImage.complete) {
                 ctx.drawImage(playerImage, player.x - 60, player.y - 120, 120, 240);
@@ -591,6 +630,13 @@
                         saveGameState();
                     }
                     break;
+                
+                case 'door_back':
+                    updateTerminal("> Going back")
+                    gameState.currentroom = 'room5';
+                    saveGameState();
+                    window.location.href = '/5'
+                    break;
             }
         }
 
@@ -637,7 +683,7 @@
         }
 
         // Initialize game
-        // loadGameState();
+        loadGameState();
         updateInventory();
         startTimer();
         gameLoop();
