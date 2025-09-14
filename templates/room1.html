@@ -613,41 +613,11 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Set background image position and size
-            if (!bgLoaded) {
-                if (bgImage.complete) {
-                    // Make image quadratic and touch the top
-                    bgScaledWidth = canvas.width;
-                    bgScaledHeight = canvas.height;
-                    bgX = 0;
-                    bgY = 0;
-                    // Position the background image
-                    bgImage.style.left = bgX + 'px';
-                    bgImage.style.top = bgY + 'px';
-                    bgImage.style.width = bgScaledWidth + 'px';
-                    bgImage.style.height = bgScaledHeight + 'px';
-                    bgLoaded = true;
-
-                    // Adjust player starting position to be within the background image
-                    player.x = bgX + bgScaledWidth / 2;
-                    player.y = bgY + bgScaledHeight - 100;
-                } else {
-                    bgImage.onload = () => {
-                        // Make image quadratic and touch the top
-                        bgScaledWidth = canvas.width;
-                        bgScaledHeight = canvas.height;
-                        bgX = 0;
-                        bgY = 0;
-                        bgImage.style.left = bgX + 'px';
-                        bgImage.style.top = bgY + 'px';
-                        bgImage.style.width = bgScaledWidth + 'px';
-                        bgImage.style.height = bgScaledHeight + 'px';
-                        bgLoaded = true;
-
-                        // Adjust player starting position to be within the background image
-                        player.x = bgX + bgScaledWidth / 2;
-                        player.y = bgY + bgScaledHeight - 100;
-                    };
-                }
+            if (bgImage.complete) {
+                bgImage.style.left = bgX + 'px';
+                bgImage.style.top = bgY + 'px';
+                bgImage.style.width = '750px';
+                bgImage.style.height = '100%';
             }
 
             // Draw hidden "T" in background

@@ -720,7 +720,7 @@
         function interactWithObject(obj) {
             switch (obj.type) {
                 case 'pile_of_suits':
-                    if (!gameState.hasWrench) {
+                    if (!gameState.inventory.includes("Wrench")) {
                         puzzleModal.style.display = 'block';
                         puzzleContent.innerHTML = "A pile of spacesuits lie on the floor. It reeks with parasites and a repellent odor."
                         searchPileBtn.style.display = 'block'
@@ -731,7 +731,7 @@
 
                 case 'fuel_tank':
                     if (obj.locked) {
-                        if (gameState.hasWrench) {
+                        if (gameState.inventory.includes("Wrench")) {
                             obj.locked = false;
                             updateTerminal("> You used the Wrench to open the Fuel Tank!");
                         } else {
@@ -744,6 +744,8 @@
                             gameState.engineFixed = true
                             updateTerminal("> You attached an Oxygen Tank to the Fuel Tank.");
                             updateTerminal("> Engine status: OXYGEN REPLENISHED. ENGINE OPERATION RESTORED.")
+                            gameState.timer += 100
+                            updateTerminal("> Predicted time until impact extended by 100 seconds!")
                             saveGameState();
                             camera.shakeVelY = 20;
                             camera.shakeVelX = -30;
