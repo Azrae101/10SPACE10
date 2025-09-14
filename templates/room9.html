@@ -829,17 +829,9 @@
                 currentFrame = 0; // idle pose
             }
 
-            // Constrain player to the canvas
-            const bgX = (canvas.width - bgScaledWidth) / 2;
-            const bgY = 300; // top aligned
-
-            const leftLimit = bgX + player.radius;
-            const rightLimit = bgX + bgScaledWidth - player.radius;
-            player.x = Math.max(leftLimit, Math.min(rightLimit, player.x));
-
-            const bottomLimit = canvas.height - player.radius - 10;
-            const topLimit = bottomLimit - 80;
-            player.y = Math.max(topLimit, Math.min(bottomLimit, player.y));
+            // Constrain player to room
+            player.x = Math.max(roomBounds.x0 + player.radius + 30, Math.min(roomBounds.x1 - player.radius - 30, player.x));
+            player.y = Math.max(roomBounds.y0 + player.radius + 30, Math.min(roomBounds.y1 - player.radius - 30, player.y));
 
             // Remove nearObject usage and interaction hint for this room
             player.nearObject = null;
