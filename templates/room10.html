@@ -253,6 +253,26 @@
             text-align: center;
         }
 
+        .ending-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 160;
+            display: none;
+        }
+
+        .ending-image {
+            max-width: 80%;
+            max-height: 80%;
+            transform: scale(3);
+        }
+
         .settings-button {
             position: absolute;
             top: 10px;
@@ -362,6 +382,10 @@
 
         <div id="pauseOverlay" class="pause-overlay">
             <h1 class="pause-title">PAUSED</h1>
+        </div>
+
+        <div id="endingOverlay" class="ending-overlay">
+            <img id="endingImage" class="ending-image" src="" />
         </div>
     </div>
 
@@ -522,17 +546,25 @@
         // Submit code button
         submitCodeBtn.addEventListener('click', () => {
             const code = codeInput.value.toUpperCase();
+            const endingOverlay = document.getElementById('endingOverlay');
+            const endingImage = document.getElementById('endingImage');
             if (code === 'EGOCENTRIC') {
                 alert("How selfish... Now the parasites will land on earth.");
                 gameState.codeEntered = true;
                 updateTerminal("> Code accepted! Escape pod is now activated.");
                 codeModal.style.display = 'none';
+                // Show Bad.gif
+                endingImage.src = '/static/Bad.gif';
+                endingOverlay.style.display = 'flex';
                 saveGameState();
             } else if (code === 'GEOCENTRIC') {
                 alert("That is nice of you. You steered the ship in another direction, so the parasites do not infect humans on earth.");
                 gameState.codeEntered = true;
                 updateTerminal("> Code accepted! Escape pod is now activated.");
                 codeModal.style.display = 'none';
+                // Show Good.gif
+                endingImage.src = '/static/Good.gif';
+                endingOverlay.style.display = 'flex';
                 saveGameState();
             } else {
                 updateTerminal("> Invalid code. Try again.");
