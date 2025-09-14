@@ -503,6 +503,13 @@
             left: ['/static/Chrfacingright1.png','/static/Chrfacingright2.png'] // mirrored later
         };
 
+        const ambientSound = new Audio("/static/audio/spaceship_ambience.mp3")
+        ambientSound.autoPlay = true
+        ambientSound.loop = true
+        ambientSound.play()
+
+        const clickSound = new Audio("/static/audio/click.mp3")
+
         let playerFrames = {};
         for (let dir in playerSprites) {
             playerFrames[dir] = playerSprites[dir].map(src => {
@@ -567,6 +574,7 @@
                 updateTerminal("> You lifted the loose tile and found an Access Key!");
                 puzzleModal.style.display = 'none';
                 saveGameState();
+                clickSound.play()
             }
         });
 
@@ -779,19 +787,6 @@
                 ctx.arc(lightX, lightY, 80, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.globalCompositeOperation = 'source-over';
-
-                // Always redraw player to prevent lightening artifacts
-                if (playerImage.complete) {
-                    ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
-                } else {
-                    // Fallback to circle if image not loaded
-                    ctx.fillStyle = player.color;
-                    ctx.beginPath();
-                    ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
-                }
             }
         }
 
@@ -914,6 +909,7 @@
                             roomObjects.splice(index, 1);
                         }
                         saveGameState();
+                        clickSound.play()
                     }
                     break;
             }

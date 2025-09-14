@@ -397,6 +397,13 @@
         const eImage = new Image();
         eImage.src = '/static/e.png'
 
+        const ambientSound = new Audio("/static/audio/spaceship_ambience.mp3")
+        ambientSound.autoPlay = true
+        ambientSound.loop = true
+        ambientSound.play()
+
+        const clickSound = new Audio("/static/audio/click.mp3")
+
         // Room layout and objects
         const roomObjects = [
             {
@@ -662,6 +669,7 @@
                         pickupWrenchBtn.style.display = 'block'
                         gameState.toiletLidOpen = false;
                         saveGameState();
+                        clickSound.play()
                     }
                     break;
                 
