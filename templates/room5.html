@@ -395,12 +395,28 @@
                 interactive: true
             },
             {
+                type: 'door_7',
+                x: 5140,
+                y: 380, // Moved to bottom
+                width: 120,
+                height: 300,
+                interactive: true
+            },
+            {
                 type: 'door_9',
                 x: 3120,
                 y: 320, // Moved to bottom
                 width: 180,
                 height: 280,
                 interactive: true
+            },
+            {
+                type: 'i',
+                x: 1960,
+                y: 290,
+                width: 20,
+                height: 40,
+                interactive: false,
             },
         ];
 
@@ -453,6 +469,10 @@
 
         const doorImage = new Image();
         doorImage.src = '/static/door.png'
+
+        const iImage = new Image();
+        iImage.src = '/static/i.png'
+        
 
         // const darkImage = new Image();
         // darkImage.src = '/static/dark.png';
@@ -551,9 +571,17 @@
                         ctx.scale(-1, 1)
                         break;
                     
+                    case 'i':
+                        ctx.drawImage(iImage, obj.x, obj.y, obj.width, obj.height);
+                        break;
+                    
                     case 'door_6':
                     case 'door_9':
                         ctx.drawImage(doorImage, obj.x, obj.y, obj.width, obj.height);
+                        break;
+                    
+                    case 'door_7':
+                        ctx.drawImage(sideDoorImage, obj.x, obj.y, obj.width, obj.height);
                         break;
 
                     case 'equipment':
@@ -720,6 +748,16 @@
                     gameState.currentroom = 'room6';
                     saveGameState();
                     window.location.href = '/6'
+                    break;
+                
+                case 'door_7':
+                    updateTerminal("> Going to engineering room.");
+                    gameState.currentRoom = 'room7';
+                    if (!gameState.wireConnections) {
+                        gameState.wireConnections = []
+                    }
+                    saveGameState();
+                    window.location.href = '/7';
                     break;
 
                 case 'door_9':
