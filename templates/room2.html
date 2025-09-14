@@ -479,9 +479,26 @@
             direction: 'down'
         };
 
-        // Load player image
-        const playerImage = new Image();
-        playerImage.src = '/static/chr.png';
+        // Player animation frames
+        const playerSprites = {
+            down: ['/static/chrfront1.png','/static/chrfront2.png','/static/chrfront3.png','/static/chrfront4.png'],
+            up: ['/static/chrback1.png','/static/chrback2.png','/static/chrback3.png','/static/chrback4.png'],
+            right: ['/static/Chrfacingright1.png','/static/Chrfacingright2.png'],
+            left: ['/static/Chrfacingright1.png','/static/Chrfacingright2.png'] // mirrored later
+        };
+
+        let playerFrames = {};
+        for (let dir in playerSprites) {
+            playerFrames[dir] = playerSprites[dir].map(src => {
+                let img = new Image();
+                img.src = src;
+                return img;
+            });
+        }
+
+        let animCounter = 0;
+        let currentFrame = 0;
+
 
         // Input handling
         const keys = {};
@@ -708,18 +725,28 @@
                 }
             });
 
-            // Draw player
-            if (playerImage.complete) {
-                ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
+            // Draw animated player
+            let frames = playerFrames[player.direction];
+            let frame = frames[currentFrame % frames.length];
+
+            if (frame.complete) {
+                if (player.direction === 'left') {
+                    // Mirror image for left
+                    ctx.save();
+                    ctx.scale(-1, 1);
+                    ctx.drawImage(frame, -(player.x + 40), player.y - 80, 80, 160);
+                    ctx.restore();
+                } else {
+                    ctx.drawImage(frame, player.x - 40, player.y - 80, 80, 160);
+                }
             } else {
-                // Fallback to circle if image not loaded
+                // Fallback placeholder
                 ctx.fillStyle = player.color;
                 ctx.beginPath();
                 ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
             }
+
 
             // Draw flashing lights
             flashingLights.forEach(light => {
@@ -743,6 +770,15 @@
             if (keys['s'] || keys['arrowdown']) { player.y += player.speed; player.direction = 'down'; moved = true; }
             if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; player.direction = 'left'; moved = true; }
             if (keys['d'] || keys['arrowright']) { player.x += player.speed; player.direction = 'right'; moved = true; }
+
+            if (moved) {
+                animCounter++;
+                if (animCounter % 10 === 0) { // change frame every 10 ticks
+                    currentFrame++;
+                }
+            } else {
+                currentFrame = 0; // idle pose
+            }
 
             // Constrain player to floor area only (not walls)
             const floorTop = 820; // Adjusted to objects' y position
