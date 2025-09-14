@@ -472,15 +472,6 @@
                 width: 120,
                 height: 60,
                 interactive: true
-            },
-            {
-                type: 'flashlight',
-                x: 300,
-                y: 630,
-                width: 20,
-                height: 20,
-                interactive: true,
-                item: 'Flashlight'
             }
         ];
 
@@ -716,23 +707,6 @@
                             };
                         }
                         break;
-
-                    case 'flashlight':
-                        // Only draw if not in inventory
-                        if (!gameState.inventory.includes('Flashlight')) {
-                            // Draw flashlight body (cylinder-like)
-                            ctx.fillStyle = '#333333';
-                            ctx.fillRect(obj.x + bgX + 2, obj.y, obj.width - 4, obj.height);
-                            // Draw lens
-                            ctx.fillStyle = '#ffff00';
-                            ctx.beginPath();
-                            ctx.arc(obj.x + bgX + obj.width / 2, obj.y + obj.height / 2, 8, 0, Math.PI * 2);
-                            ctx.fill();
-                            // Draw switch
-                            ctx.fillStyle = '#666666';
-                            ctx.fillRect(obj.x + bgX + obj.width - 5, obj.y + 5, 3, 10);
-                        }
-                        break;
                 }
             });
 
@@ -765,34 +739,6 @@
                 ctx.arc(light.x, light.y, light.radius, 0, Math.PI * 2);
                 ctx.fill();
             });
-
-            // Draw flashlight light
-            if (gameState.inventory.includes('Flashlight')) {
-                ctx.globalCompositeOperation = 'lighter';
-                let lightX = player.x, lightY = player.y;
-                if (player.direction === 'up') lightY -= 100;
-                else if (player.direction === 'down') lightY += 100;
-                else if (player.direction === 'left') lightX -= 100;
-                else if (player.direction === 'right') lightX += 100;
-                ctx.fillStyle = 'rgba(255,255,200,0.4)'; // slightly yellow
-                ctx.beginPath();
-                ctx.arc(lightX, lightY, 80, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalCompositeOperation = 'source-over';
-
-                // Always redraw player to prevent lightening artifacts
-                if (playerImage.complete) {
-                    ctx.drawImage(playerImage, player.x - 40, player.y - 80, 80, 160);
-                } else {
-                    // Fallback to circle if image not loaded
-                    ctx.fillStyle = player.color;
-                    ctx.beginPath();
-                    ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(player.x - 8, player.y - 5, 16, 10); // Visor
-                }
-            }
         }
 
         // Update game state
@@ -901,20 +847,6 @@
 
                 case 'console':
                     updateTerminal("> The console displays: 'SYSTEM OFFLINE - MAINTENANCE REQUIRED'");
-                    break;
-
-                case 'flashlight':
-                    if (!gameState.inventory.includes('Flashlight')) {
-                        gameState.inventory.push('Flashlight');
-                        updateInventory();
-                        updateTerminal("> You picked up a Flashlight!");
-                        // Remove the flashlight from roomObjects
-                        const index = roomObjects.indexOf(obj);
-                        if (index > -1) {
-                            roomObjects.splice(index, 1);
-                        }
-                        saveGameState();
-                    }
                     break;
             }
         }
