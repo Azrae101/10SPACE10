@@ -460,12 +460,11 @@
             },
             {
                 type: 'door',
-                x: 700,  // Adjusted position
-                y: 400,  // Adjusted position
-                width: 80,
-                height: 160,
-                interactive: true,
-                locked: true
+                x: 500,  // Position near bottom
+                y: 700,  // Near player spawn
+                width: 200,
+                height: 5,
+                interactive: true
             }
         ];
 
@@ -649,18 +648,8 @@
                         break;
                         
                     case 'door':
-                        ctx.fillStyle = gameState.codeEntered ? '#4a5d2a' : '#2a201b';
+                        ctx.fillStyle = '#000000';
                         ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
-
-                        // Draw door details
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(obj.x + 10, obj.y + 20, 5, 120);
-                        ctx.fillRect(obj.x + obj.width - 15, obj.y + 20, 5, 120);
-
-                        // Draw door label
-                        ctx.fillStyle = '#fff';
-                        ctx.font = '14px Arial';
-                        ctx.fillText("ESCAPE POD", obj.x + 15, obj.y + 100);
                         break;
                 }
             });
@@ -701,7 +690,7 @@
             const bgY = 0;
 
             const bottomLimit = bgY + bgScaledHeight - player.radius + 270; // allow going far down
-            const topLimit = bottomLimit - 200; // only allow 200px of vertical range
+            const topLimit = bgY + player.radius + 50; // allow moving much more up, 50px from top of bg
 
             player.x = Math.max(
                 player.radius + bgX + 90,                             
@@ -769,17 +758,7 @@
                     break;
 
                 case 'door':
-                    if (gameState.codeEntered) {
-                        updateTerminal("> The escape pod is activated! You can now escape!");
-                        // Transition to victory screen or next level
-                        setTimeout(() => {
-                            alert("Congratulations! You've escaped the space station!");
-                            localStorage.removeItem('spaceStationGameState');
-                            window.location.href = '/1';
-                        }, 2000);
-                    } else {
-                        updateTerminal("> The escape pod is locked. You need to activate it from the control console first.");
-                    }
+                    window.location.href = '/8';
                     break;
             }
         }
