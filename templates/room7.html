@@ -583,6 +583,13 @@
         const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = false;
 
+        const ambientSound = new Audio("/static/audio/spaceship_ambience.mp3")
+        ambientSound.autoPlay = true
+        ambientSound.loop = true
+        ambientSound.play()
+
+        const clickSound = new Audio("/static/audio/click.mp3")
+
         // Room objects
         const roomObjects = [
             {
@@ -882,6 +889,7 @@
                         gameState.lightsOn = obj.isOn;
                         updateTerminal("> Safety switch " + (obj.isOn ? "activated" : "deactivated") + ".");
                         updateTerminal("> Lights " + (obj.isOn ? "on" : "off") + ".");
+                        clickSound.play()
                     } else {
                         updateTerminal("> Safety switch won't activate. Complete both puzzles first.");
                     }

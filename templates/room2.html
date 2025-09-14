@@ -496,6 +496,11 @@
             });
         }
 
+        const ambientSound = new Audio("/static/audio/spaceship_ambience.mp3")
+        ambientSound.autoPlay = true
+        ambientSound.loop = true
+        ambientSound.play()
+
         let animCounter = 0;
         let currentFrame = 0;
 

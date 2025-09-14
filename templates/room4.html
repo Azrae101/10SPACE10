@@ -403,6 +403,18 @@
         // Background image element
         const bgImage = document.getElementById('bgImage');
 
+        const ambientSound = new Audio("/static/audio/spaceship_ambience.mp3")
+        ambientSound.autoPlay = true
+        ambientSound.loop = true
+        ambientSound.play()
+
+        const parasiteSound = new Audio("/static/audio/parasit.mp3")
+        parasiteSound.loop = true
+        parasiteSound.volume = 0.5
+        parasiteSound.playbackRate = 1.2
+
+        const explosionSound = new Audio("/static/audio/explosion.mp3")
+
         // Room layout and objects
         const roomObjects = [
             {
@@ -543,6 +555,7 @@
         // Close puzzle modal
         closePuzzleBtn.addEventListener('click', () => {
             puzzleModal.style.display = 'none';
+            parasiteSound.pause()
         });
 
         // Search pile button
@@ -564,6 +577,7 @@
                 updateTerminal("> You dug into the pile of suits and found a wrench!");
                 puzzleModal.style.display = 'none';
                 saveGameState();
+                parasiteSound.pause()
             }
         });
 
@@ -711,6 +725,7 @@
                         puzzleContent.innerHTML = "A pile of spacesuits lie on the floor. It reeks with parasites and a repellent odor."
                         searchPileBtn.style.display = 'block'
                         pickupWrenchBtn.style.display = 'none'
+                        parasiteSound.play()
                     }
                     break;
 
@@ -732,6 +747,7 @@
                             saveGameState();
                             camera.shakeVelY = 20;
                             camera.shakeVelX = -30;
+                            explosionSound.play()
                         }
                     }
                     break;

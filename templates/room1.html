@@ -490,9 +490,16 @@
         const playerSprites = {
             down: ['/static/chrfront1.png','/static/chrfront2.png','/static/chrfront3.png','/static/chrfront4.png'],
             up: ['/static/chrback1.png','/static/chrback2.png','/static/chrback3.png','/static/chrback4.png'],
-            right: ['/static/chrfacingright1.png','/static/chrfacingright2.png'],
-            left: ['/static/chrfacingright1.png','/static/chrfacingright2.png'] // will be mirrored
+            right: ['/static/Chrfacingright1.png','/static/Chrfacingright2.png'],
+            left: ['/static/Chrfacingright1.png','/static/Chrfacingright2.png'] // mirrored later
         };
+
+        const ambientSound = new Audio("/static/audio/spaceship_ambience.mp3")
+        ambientSound.autoPlay = true
+        ambientSound.loop = true
+        ambientSound.play()
+
+        const clickSound = new Audio("/static/audio/click.mp3")
 
         let playerFrames = {};
         for (let dir in playerSprites) {
@@ -558,6 +565,7 @@
                 updateTerminal("> You lifted the loose tile and found an Access Key!");
                 puzzleModal.style.display = 'none';
                 saveGameState();
+                clickSound.play()
             }
         });
 
@@ -739,6 +747,21 @@
                 ctx.arc(light.x, light.y, light.radius, 0, Math.PI * 2);
                 ctx.fill();
             });
+
+            // Draw flashlight light
+            if (gameState.inventory.includes('Flashlight')) {
+                ctx.globalCompositeOperation = 'lighter';
+                let lightX = player.x, lightY = player.y;
+                if (player.direction === 'up') lightY -= 100;
+                else if (player.direction === 'down') lightY += 100;
+                else if (player.direction === 'left') lightX -= 100;
+                else if (player.direction === 'right') lightX += 100;
+                ctx.fillStyle = 'rgba(255,255,200,0.4)'; // slightly yellow
+                ctx.beginPath();
+                ctx.arc(lightX, lightY, 80, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalCompositeOperation = 'source-over';
+            }
         }
 
         // Update game state
@@ -847,6 +870,21 @@
 
                 case 'console':
                     updateTerminal("> The console displays: 'SYSTEM OFFLINE - MAINTENANCE REQUIRED'");
+                    break;
+
+                case 'flashlight':
+                    if (!gameState.inventory.includes('Flashlight')) {
+                        gameState.inventory.push('Flashlight');
+                        updateInventory();
+                        updateTerminal("> You picked up a Flashlight!");
+                        // Remove the flashlight from roomObjects
+                        const index = roomObjects.indexOf(obj);
+                        if (index > -1) {
+                            roomObjects.splice(index, 1);
+                        }
+                        saveGameState();
+                        clickSound.play()
+                    }
                     break;
             }
         }

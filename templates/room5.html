@@ -496,6 +496,11 @@
         const darkFlashlightImage = new Image();
         darkFlashlightImage.src = '/static/dark_flashlight.png'
 
+        const ambientSound = new Audio("/static/audio/spaceship_ambience.mp3")
+        ambientSound.autoPlay = true
+        ambientSound.loop = true
+        ambientSound.play()
+
         // Input handling
         const keys = {};
 

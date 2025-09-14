@@ -466,6 +466,15 @@
         const parasiteImage = new Image();
         parasiteImage.src = '/static/Parasite.gif';
 
+        const ambientSound = new Audio("/static/audio/spaceship_ambience.mp3")
+        ambientSound.autoPlay = true
+        ambientSound.loop = true
+        ambientSound.play()
+        
+        const parasitSound = new Audio("/static/audio/parasit.mp3")
+        parasitSound.volume = 0.5
+        parasitSound.playbackRate = 1.2
+
         // Input handling
         const keys = {};
 
@@ -714,6 +723,7 @@
                     // Push player away
                     player.x += (player.x - parasite.x) * 0.1;
                     player.y += (player.y - parasite.y) * 0.1;
+                    parasitSound.play()
                 }
             });
         }

@@ -509,6 +509,13 @@
         const doorImage = new Image();
         doorImage.src = '/static/side_door.png';
 
+        const ambientSound = new Audio("/static/audio/spaceship_ambience.mp3")
+        ambientSound.autoPlay = true
+        ambientSound.loop = true
+        ambientSound.play()
+
+        const clickSound = new Audio("/static/audio/click.mp3")
+
         // Input handling
         const keys = {};
 
@@ -744,6 +751,7 @@
                         updateTerminal("> You found a screwdriver hidden behind the book!");
                         puzzleModal.style.display = 'block';
                         saveGameState();
+                        clickSound.play()
                     }
                     break;
 
