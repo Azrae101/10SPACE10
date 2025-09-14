@@ -474,8 +474,8 @@
         iImage.src = '/static/i.png'
         
 
-        // const darkImage = new Image();
-        // darkImage.src = '/static/dark.png';
+        const darkImage = new Image();
+        darkImage.src = '/static/dark.png';
 
         const darkFlashlightImage = new Image();
         darkFlashlightImage.src = '/static/dark_flashlight.png'
@@ -651,18 +651,23 @@
             // ctx.drawImage(darkImage, player.x - 1536, player.y - 1152, 3072, 2304)
 
             // ctx.translate(player.x - 1536, player.y - 1152)
-            ctx.translate(player.x, player.y)
-            if (player.direction === 'right') {
-                ctx.drawImage(darkFlashlightImage, -1536, -1152, 3072, 2304)
-            } else if (player.direction === 'up') {
-                ctx.rotate(-Math.PI / 2)
-                ctx.drawImage(darkFlashlightImage, -1536, -1152, 3072, 2304)
-            } else if (player.direction === 'left') {
-                ctx.rotate(Math.PI)
-                ctx.drawImage(darkFlashlightImage, -1536, -1152, 3072, 2304)
-            } else {
-                ctx.rotate(Math.PI / 2)
-                ctx.drawImage(darkFlashlightImage, -1536, -1152, 3072, 2304)
+
+            if (!gameState.lightsOn) {
+                let img = gameState.inventory.includes('Flashlight') ? darkFlashlightImage : darkImage;
+
+                ctx.translate(player.x, player.y)
+                if (player.direction === 'right') {
+                    ctx.drawImage(img, -1536, -1152, 3072, 2304)
+                } else if (player.direction === 'up') {
+                    ctx.rotate(-Math.PI / 2)
+                    ctx.drawImage(img, -1536, -1152, 3072, 2304)
+                } else if (player.direction === 'left') {
+                    ctx.rotate(Math.PI)
+                    ctx.drawImage(img, -1536, -1152, 3072, 2304)
+                } else {
+                    ctx.rotate(Math.PI / 2)
+                    ctx.drawImage(img, -1536, -1152, 3072, 2304)
+                }
             }
         }
 
