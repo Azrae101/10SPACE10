@@ -422,7 +422,7 @@
             },
             {
                 type: 'door',
-                x: 600,
+                x: 650,
                 y: 550,
                 width: 80,
                 height: 160,
@@ -490,6 +490,10 @@
         // Load terminal image
         const terminalImage = new Image();
         terminalImage.src = '/static/terminal.png';
+
+        // Load key image
+        const keyImage = new Image();
+        keyImage.src = '/static/Key.png';
 
         // Input handling
         const keys = {};
@@ -611,6 +615,11 @@
                 }
             }
 
+            // Draw hidden "T" in background
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.font = '36px Courier New';
+            ctx.fillText('T', 700, 50);
+
         // Draw objects
         roomObjects.forEach(obj => {
             switch (obj.type) {
@@ -631,10 +640,13 @@
                             ctx.fillRect(obj.x + bgX, obj.y, obj.width / 2, obj.height);
                         } else if (obj.item && !gameState.hasKey) {
                             // Draw key if not yet taken
-                            ctx.fillStyle = '#fffc00';
-                            ctx.beginPath();
-                            ctx.arc(obj.x + bgX + obj.width/2, obj.y + obj.height/2, 8, 0, Math.PI * 2);
-                            ctx.fill();
+                            if (keyImage.complete) {
+                                ctx.drawImage(keyImage, obj.x + bgX + obj.width/2 - 10, obj.y + obj.height/2 - 10, 20, 20);
+                            } else {
+                                keyImage.onload = () => {
+                                    ctx.drawImage(keyImage, obj.x + bgX + obj.width/2 - 10, obj.y + obj.height/2 - 10, 20, 20);
+                                };
+                            }
                         }
                     }
                     break;
