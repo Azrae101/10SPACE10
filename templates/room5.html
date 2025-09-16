@@ -677,26 +677,24 @@
             }
 
             // Draw darkness
-            // ctx.drawImage(darkImage, player.x - 1536, player.y - 1152, 3072, 2304)
-
-            // ctx.translate(player.x - 1536, player.y - 1152)
-
             if (!gameState.lightsOn) {
-                let img = gameState.inventory.includes('Flashlight') ? darkFlashlightImage : darkImage;
-
-                ctx.translate(player.x, player.y)
+                let hasFlashlight = gameState.inventory && gameState.inventory.includes('Flashlight');
+                let img = hasFlashlight ? darkFlashlightImage : darkImage;
+                ctx.save();
+                ctx.translate(player.x, player.y);
                 if (player.direction === 'right') {
-                    ctx.drawImage(img, -1536, -1152, 3072, 2304)
+                    ctx.drawImage(img, -1536, -1152, 3072, 2304);
                 } else if (player.direction === 'up') {
-                    ctx.rotate(-Math.PI / 2)
-                    ctx.drawImage(img, -1536, -1152, 3072, 2304)
+                    ctx.rotate(-Math.PI / 2);
+                    ctx.drawImage(img, -1536, -1152, 3072, 2304);
                 } else if (player.direction === 'left') {
-                    ctx.rotate(Math.PI)
-                    ctx.drawImage(img, -1536, -1152, 3072, 2304)
+                    ctx.rotate(Math.PI);
+                    ctx.drawImage(img, -1536, -1152, 3072, 2304);
                 } else {
-                    ctx.rotate(Math.PI / 2)
-                    ctx.drawImage(img, -1536, -1152, 3072, 2304)
+                    ctx.rotate(Math.PI / 2);
+                    ctx.drawImage(img, -1536, -1152, 3072, 2304);
                 }
+                ctx.restore();
             }
         }
 

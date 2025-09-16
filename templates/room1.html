@@ -472,6 +472,14 @@
                 width: 120,
                 height: 60,
                 interactive: true
+            },
+            {
+                type: 'flashlight',
+                x: 320,
+                y: 680,
+                width: 30,
+                height: 20,
+                interactive: true
             }
         ];
 
@@ -528,6 +536,10 @@
         // Load key image
         const keyImage = new Image();
         keyImage.src = '/static/Key.png';
+
+        // Load flashlight image
+        const flashlightImage = new Image();
+        flashlightImage.src = '/static/flashlight.png';
 
         // Input handling
         const keys = {};
@@ -666,25 +678,36 @@
                     }
                     break;
 
-                    case 'equipment':
-                        ctx.fillStyle = '#333344';
-                        ctx.fillRect(obj.x + bgX, obj.y, obj.width, obj.height);
-
-                        // Add equipment details
-                        ctx.fillStyle = '#4afcff';
-                        ctx.fillRect(obj.x + bgX + 10, obj.y + 10, 10, 10);
-                        ctx.fillRect(obj.x + bgX + obj.width - 20, obj.y + 10, 10, 10);
-                        break;
-
-                    case 'console':
-                        if (terminalImage.complete) {
-                            ctx.drawImage(terminalImage, obj.x + bgX, obj.y, obj.width, obj.height);
+                case 'flashlight':
+                    if (!gameState.inventory.includes('Flashlight')) {
+                        if (flashlightImage.complete) {
+                            ctx.drawImage(flashlightImage, obj.x + bgX, obj.y, obj.width, obj.height);
                         } else {
-                            terminalImage.onload = () => {
-                                ctx.drawImage(terminalImage, obj.x + bgX, obj.y, obj.width, obj.height);
-                            };
+                            ctx.fillStyle = '#ffff99';
+                            ctx.fillRect(obj.x + bgX, obj.y, obj.width, obj.height);
                         }
-                        break;
+                    }
+                    break;
+
+                case 'equipment':
+                    ctx.fillStyle = '#333344';
+                    ctx.fillRect(obj.x + bgX, obj.y, obj.width, obj.height);
+
+                    // Add equipment details
+                    ctx.fillStyle = '#4afcff';
+                    ctx.fillRect(obj.x + bgX + 10, obj.y + 10, 10, 10);
+                    ctx.fillRect(obj.x + bgX + obj.width - 20, obj.y + 10, 10, 10);
+                    break;
+
+                case 'console':
+                    if (terminalImage.complete) {
+                        ctx.drawImage(terminalImage, obj.x + bgX, obj.y, obj.width, obj.height);
+                    } else {
+                        terminalImage.onload = () => {
+                            ctx.drawImage(terminalImage, obj.x + bgX, obj.y, obj.width, obj.height);
+                        };
+                    }
+                    break;
                 }
             });
 
