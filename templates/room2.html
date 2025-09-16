@@ -346,7 +346,6 @@
 
         <div class="terminal">
             <div id="terminal-content">
-                > You have entered the corridor leading to the escape pods.<br>
                 > The corridor is dimly lit, with emergency lights flickering.<br>
                 > There's a locked door ahead. You need to find a way to open it.<br>
                 > Use WASD to move around and SPACE to interact with objects.
@@ -851,14 +850,6 @@
                 case 'security_panel':
                     if (!gameState.exitUnlocked) {
                         puzzleModal.style.display = 'block';
-                    } else {
-                        updateTerminal("> The exit is unlocked. You have escaped!");
-                        // Game over - could redirect to win screen
-                        setTimeout(() => {
-                            alert("Congratulations! You have escaped the space station!");
-                            localStorage.removeItem('spaceStationGameState');
-                            window.location.href = '/';
-                        }, 2000);
                     }
                     break;
 
